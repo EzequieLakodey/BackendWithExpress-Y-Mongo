@@ -1,10 +1,6 @@
 import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(new URL(import.meta.url));
-const __dirname = path.dirname(__filename);
 
-class productManager {
+class productsManager {
     constructor(filePath) {
         this.products = [];
         this.idCounter = 1;
@@ -77,7 +73,7 @@ class productManager {
         this.products.push(newProduct);
         await this.writeToFile()
             .then(() => {
-                console.log(`Data written succesfully`);
+                console.log('Data written succesfully');
             })
             .catch((error) => console.log(`Error written file ${error}`));
         return newProduct;
@@ -124,58 +120,4 @@ class productManager {
     }
 }
 
-// Creation
-export const manager = new productManager(
-    path.join(__dirname, 'products.json')
-);
-console.log(manager.getProducts());
-
-const newProduct = {
-    title: 'producto prueba',
-    description: 'Este es un producto de prueba',
-    price: 200,
-    thumbnail: 'Sin imagen',
-    code: 'abc123',
-    stock: 25,
-};
-
-// Addition
-manager.addProduct(newProduct);
-console.log(manager.getProducts());
-
-// Searching
-console.log(manager.getProductsById(1));
-console.log(manager.getProductsById(2));
-
-// Updating
-manager.updateProduct(1, { price: 300, description: 'Updated description' });
-console.log(manager.getProducts());
-
-// Deleting
-manager.deleteProduct(1);
-console.log(manager.getProducts());
-
-// Creation
-const otherProduct = {
-    title: 'Product Name',
-    description: 'Product Description',
-    price: 100,
-    thumbnail: 'product-image.jpg',
-    code: 'ABC123',
-    stock: 10,
-};
-
-// Addition
-manager.addProduct(otherProduct);
-
-// Updating
-manager.updateProduct(1, {
-    title: 'Iphone 13 max',
-    description: 'Apple is trash',
-    price: 'So expensive',
-    thumbnail: 'Search in google',
-    code: 'omega or alpha idk',
-    stock: 'ask steve jobs',
-});
-
-export default productManager;
+export default productsManager;
