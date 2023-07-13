@@ -6,10 +6,6 @@ const app = express();
 const port = 8080;
 
 app.use(express.json());
-app.use('/api/products', productsRouter);
-app.use('/api/carts', cartRouter);
-
-app.use(express.json());
 
 // launching server
 app.listen(port, () => {

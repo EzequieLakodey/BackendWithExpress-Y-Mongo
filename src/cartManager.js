@@ -5,6 +5,11 @@ class cartManager {
         this.carts = [];
         this.idCounter = 1;
         this.path = filePath;
+
+        if (!fs.existsSync(this.path)) {
+            fs.promises.writeFile(this.path, JSON.stringify([]));
+        }
+
         this.readFromFile();
     }
 
@@ -14,10 +19,10 @@ class cartManager {
             try {
                 const json = JSON.parse(data);
                 if (Array.isArray(json)) {
-                    this.products = json;
+                    this.carts = json;
                     this.idCounter =
-                        this.products.length > 0
-                            ? this.products[this.products.length - 1].id + 1
+                        this.carts.length > 0
+                            ? this.carts[this.carts.length - 1].id + 1
                             : 1;
                 }
             } catch (err) {
@@ -29,7 +34,7 @@ class cartManager {
     }
 
     async writeToFile() {
-        const jsonString = JSON.stringify(this.products, null, 2);
+        const jsonString = JSON.stringify(this.carts, null, 2);
 
         if (typeof jsonString !== 'string') {
             throw new Error('Attempted to write non-string data to file');
@@ -41,6 +46,10 @@ class cartManager {
         } catch (error) {
             console.log(`Error writing file ${error}`);
         }
+    }
+
+    async getAllCarts() {
+        return this.carts;
     }
 
     async createCart() {

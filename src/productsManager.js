@@ -1,12 +1,26 @@
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 class productsManager {
     constructor(filePath) {
         this.products = [];
         this.idCounter = 1;
-        this.path = filePath;
-        this.readFromFile();
+        this.path = path.resolve(__dirname, filePath);
+
+        if (!fs.existsSync(this.path)) {
+            fs.promises.writeFile(this.path, JSON.stringify([])).then(() => {
+                this.readFromFile();
+            });
+        } else {
+            this.readFromFile();
+        }
     }
+
     validateProduct(product) {
         if (typeof product !== 'object') {
             throw new Error('Product data must be an object');
@@ -71,11 +85,7 @@ class productsManager {
             ...product,
         };
         this.products.push(newProduct);
-        await this.writeToFile()
-            .then(() => {
-                console.log('Data written succesfully');
-            })
-            .catch((error) => console.log(`Error written file ${error}`));
+        await this.writeToFile();
         return newProduct;
     }
 

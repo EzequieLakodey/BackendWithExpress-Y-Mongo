@@ -4,6 +4,15 @@ import { Router } from 'express';
 const router = Router();
 const cartManager = new cartsManager('carts.json');
 
+router.get('/', async (req, res) => {
+    try {
+        const carts = await cartManager.getAllCarts();
+        res.json(carts);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 router.post('/', async (req, res) => {
     try {
         const newCart = await cartManager.createCart();
@@ -15,7 +24,7 @@ router.post('/', async (req, res) => {
 
 router.get('/:cid', async (req, res) => {
     try {
-        const { cid } = req.params;
+        const cid = Number(req.params.cid);
         const cart = await cartManager.getCart(cid);
         if (cart) {
             res.json(cart);
@@ -29,7 +38,8 @@ router.get('/:cid', async (req, res) => {
 
 router.post('/:cid/product/:pid', async (req, res) => {
     try {
-        const { cid, pid } = req.params;
+        const cid = Number(req.params.cid);
+        const pid = req.params.pid;
         const { quantity } = req.body;
         const addedProduct = await cartManager.addProductToCart(
             cid,
