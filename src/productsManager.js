@@ -21,7 +21,7 @@ class productsManager {
         }
     }
 
-    validateProduct(product) {
+    validateProduct(product, ignoreId) {
         if (typeof product !== 'object') {
             throw new Error('Product data must be an object');
         }
@@ -29,7 +29,6 @@ class productsManager {
             'title',
             'description',
             'price',
-            'thumbnail',
             'code',
             'stock',
         ];
@@ -37,6 +36,14 @@ class productsManager {
             if (!product[field]) {
                 throw new Error(`Missing required field: ${field}`);
             }
+        }
+
+        if (
+            this.products.some(
+                (p) => p.code === product.code && p.id !== ignoreId
+            )
+        ) {
+            throw new Error('Product code already exists');
         }
     }
 
@@ -100,26 +107,31 @@ class productsManager {
 
     async getProductsById(id) {
         await this.readFromFile();
-        const product = this.products.find((p) => p.id === id);
+        const numId = Number(id);
+        const product = this.products.find((p) => p.id === numId);
         if (!product) {
             return null;
         }
         return product;
     }
     async updateProduct(id, newProductData) {
-        const index = this.products.findIndex((p) => p.id === id);
+        const numId = Number(id);
+        const index = this.products.findIndex((p) => p.id === numId);
         if (index === -1) {
             console.log('Inexistent product');
             return null;
         }
+
+        this.validateProduct(newProductData, numId);
         this.products[index] = { ...this.products[index], ...newProductData };
         await this.writeToFile();
         return this.products[index];
     }
 
     async deleteProduct(id) {
+        const numId = Number(id);
         const lengthBeforeRemoval = this.products.length;
-        this.products = this.products.filter((p) => p.id !== id);
+        this.products = this.products.filter((p) => p.id !== numId);
         if (this.products.length === lengthBeforeRemoval) {
             console.log('Inexistent product');
             return null;

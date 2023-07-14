@@ -1,11 +1,19 @@
 [
   {
     "id": 1,
-    "title": "Product 1",
-    "description": "This is product 1",
-    "price": 100,
+    "title": "Product 1 updated",
+    "description": "This is product 1 updated",
+    "price": 99,
     "thumbnail": "http://example.com/product1.jpg",
-    "code": "P1",
+    "code": "P9",
     "stock": 10
+  },
+  {
+    "id": 2,
+    "title": "Product 2",
+    "description": "This is product 2",
+    "price": 22,
+    "code": "22",
+    "stock": 22
   }
 ]
