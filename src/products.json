@@ -7,13 +7,5 @@
     "thumbnail": "http://example.com/product1.jpg",
     "code": "P9",
     "stock": 10
-  },
-  {
-    "id": 2,
-    "title": "Product 2",
-    "description": "This is product 2",
-    "price": 22,
-    "code": "22",
-    "stock": 22
   }
 ]
