@@ -2,12 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { EventEmitter } from 'events';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-class productsManager {
+class ProductsManager extends EventEmitter {
     constructor(filePath) {
+        super();
         this.products = [];
         this.idCounter = 1;
         this.path = path.resolve(__dirname, filePath);
@@ -93,6 +95,7 @@ class productsManager {
         };
         this.products.push(newProduct);
         await this.writeToFile();
+        this.emit('productAdded', newProduct);
         return newProduct;
     }
 
@@ -138,8 +141,9 @@ class productsManager {
         }
         await this.writeToFile();
         console.log('Product deleted succesfully');
+        this.emit('productDeleted', id);
         return id;
     }
 }
 
-export default productsManager;
+export default ProductsManager;

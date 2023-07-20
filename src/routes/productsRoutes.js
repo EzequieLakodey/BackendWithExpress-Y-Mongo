@@ -1,9 +1,9 @@
-import productsManager from '../productsManager.js';
+import ProductsManager from '../productsManager.js';
 import { Router } from 'express';
+import { io } from '../servers.js';
 
 const router = Router();
-const manager = new productsManager('products.json');
-
+const manager = new ProductsManager('products.json');
 router.get('/', async (req, res) => {
     try {
         const { limit } = req.query;
@@ -13,7 +13,6 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
@@ -27,17 +26,16 @@ router.get('/:pid', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
 router.post('/', async (req, res) => {
     try {
         const product = req.body;
         const newProduct = await manager.addProduct(product);
+        io.emit('new-product', newProduct);
         res.json(newProduct);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
-
 router.put('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
@@ -51,12 +49,12 @@ router.put('/:pid', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
 router.delete('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
         const deletedProductId = await manager.deleteProduct(pid);
         if (deletedProductId) {
+            io.emit('delete-product', deletedProductId);
             res.json({
                 message: `Product ${deletedProductId} deleted successfully`,
             });
@@ -67,5 +65,4 @@ router.delete('/:pid', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
 export { router as productsRouter };
