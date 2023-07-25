@@ -18,11 +18,8 @@ import { io, app, httpServer } from './servers.js';
 const port = 8080;
 app.use(express.json());
 
-// routes
 app.use('/products', productsRouter);
 app.use('/carts', cartRouter);
-
-// hbs
 
 const hbs = handlebars.create({ defaultLayout: null });
 app.engine('handlebars', hbs.engine);

@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-class cartManager {
+class CartManager {
     constructor(filePath) {
         this.carts = [];
         this.idCounter = 1;
@@ -100,4 +100,4 @@ class cartManager {
     }
 }
 
-export default cartManager;
+export default CartManager;

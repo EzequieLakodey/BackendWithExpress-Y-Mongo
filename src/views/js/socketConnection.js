@@ -1,6 +1,6 @@
 let socket;
 
-const connectSocket = () => {
+const connectSocket = (callBack) => {
     socket = io();
 
     socket.on('connect', () => {
@@ -11,6 +11,8 @@ const connectSocket = () => {
                 socket.disconnect();
             });
         }
+
+        callBack();
     });
 };
 
