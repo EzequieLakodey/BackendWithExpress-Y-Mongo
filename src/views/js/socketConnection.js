@@ -11,7 +11,6 @@ const connectSocket = (callBack) => {
                 socket.disconnect();
             });
         }
-
         callBack();
     });
 };
