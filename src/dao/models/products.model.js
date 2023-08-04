@@ -1,25 +1,33 @@
 import mongoose from 'mongoose';
-
 const productsCollection = 'products';
 
 const productSchema = new mongoose.Schema({
-    name: {
+    title: {
         type: String,
         required: true,
     },
-    price: {
-        type: Number,
+
+    description: {
+        type: String,
         required: true,
     },
+
     code: {
         type: String,
         required: true,
     },
+
     category: {
         type: String,
         required: true,
         enum: ['Clothing', 'Sports', 'Cosmetics'],
     },
+
+    price: {
+        type: Number,
+        required: true,
+    },
+
     stock: {
         type: Number,
         required: true,

@@ -1,26 +1,24 @@
+// file system
 import fs from 'fs';
+
+// utils
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { __dirname } from '../../../utils.js';
+
+// events handler
 import { EventEmitter } from 'events';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// uuid
+import { v4 as uuidv4 } from 'uuid';
 
+/* MODULES */
 class ProductsManager extends EventEmitter {
-    constructor(filePath) {
+    constructor(fileName) {
         super();
         this.products = [];
         this.idCounter = 1;
-        this.path = path.resolve(__dirname, filePath);
-
-        if (!fs.existsSync(this.path)) {
-            fs.promises.writeFile(this.path, JSON.stringify([])).then(() => {
-                this.readFromFile();
-            });
-        } else {
-            this.readFromFile();
-        }
+        this.path = path.join(__dirname, `/files/${fileName}`);
+        this.readFromFile();
     }
 
     validateProduct(product, ignoreId) {
@@ -35,7 +33,7 @@ class ProductsManager extends EventEmitter {
             'stock',
         ];
         for (let field of requiredFields) {
-            if (!product[field]) {
+            if (!product.hasOwnProperty(field) || !product[field] === '') {
                 throw new Error(`Missing required field: ${field}`);
             }
         }
@@ -52,35 +50,29 @@ class ProductsManager extends EventEmitter {
     async readFromFile() {
         try {
             const data = await fs.promises.readFile(this.path);
-            try {
-                const json = JSON.parse(data);
-                if (Array.isArray(json)) {
-                    this.products = json;
-                    this.idCounter =
-                        this.products.length > 0
-                            ? this.products[this.products.length - 1].id + 1
-                            : 1;
-                }
-            } catch (err) {
-                console.error('Error parsing JSON:', err);
+            const json = JSON.parse(data);
+            if (Array.isArray(json)) {
+                this.products = json;
+                this.idCounter =
+                    this.products.length > 0
+                        ? this.products[this.products.length - 1].id + 1
+                        : 1;
             }
         } catch (error) {
-            throw new Error(`Can't read disk data ${error}`);
+            console.error("Can't read disk data", error);
+            throw new Error("Can't read disk data");
         }
     }
 
     async writeToFile() {
         const jsonString = JSON.stringify(this.products, null, 2);
 
-        if (typeof jsonString !== 'string') {
-            throw new Error('Attempted to write non-string data to file');
-        }
-
         try {
             await fs.promises.writeFile(this.path, jsonString);
             console.log('Data written');
         } catch (error) {
-            console.log(`Error writing file ${error}`);
+            console.log('Error writing file', error);
+            throw new Error('Error writing file');
         }
     }
 
@@ -90,7 +82,7 @@ class ProductsManager extends EventEmitter {
             throw new Error('Product code already exists');
         }
         const newProduct = {
-            id: this.idCounter++,
+            id: uuidv4(),
             ...product,
         };
         this.products.push(newProduct);
