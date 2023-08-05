@@ -1,50 +1,50 @@
+/* eslint-disable quotes */
+
+// file system
 import fs from 'fs';
 
-class CartManager {
-    constructor(filePath) {
+// utils
+import path from 'path';
+import { __dirname } from '../../../utils.js';
+
+// uuid
+import { v4 as uuidv4 } from 'uuid';
+
+/* MODULES */
+
+class CartsManager {
+    constructor(fileName) {
         this.carts = [];
         this.idCounter = 1;
-        this.path = filePath;
-
-        if (!fs.existsSync(this.path)) {
-            fs.promises.writeFile(this.path, JSON.stringify([]));
-        }
-
+        this.path = path.join(__dirname, `/files/${fileName}`);
         this.readFromFile();
     }
 
     async readFromFile() {
         try {
             const data = await fs.promises.readFile(this.path);
-            try {
-                const json = JSON.parse(data);
-                if (Array.isArray(json)) {
-                    this.carts = json;
-                    this.idCounter =
-                        this.carts.length > 0
-                            ? this.carts[this.carts.length - 1].id + 1
-                            : 1;
-                }
-            } catch (err) {
-                console.error('Error parsing JSON:', err);
+            const json = JSON.parse(data);
+            if (Array.isArray(json)) {
+                this.carts = json;
+                this.idCounter =
+                    this.carts.length > 0
+                        ? this.carts[this.carts.length - 1].id + 1
+                        : 1;
             }
         } catch (error) {
-            throw new Error(`Can't read disk data ${error}`);
+            console.error("Can't read disk data", error);
+            throw new Error("Can't read disk data");
         }
     }
 
     async writeToFile() {
         const jsonString = JSON.stringify(this.carts, null, 2);
-
-        if (typeof jsonString !== 'string') {
-            throw new Error('Attempted to write non-string data to file');
-        }
-
         try {
             await fs.promises.writeFile(this.path, jsonString);
             console.log('Data written');
         } catch (error) {
-            console.log(`Error writing file ${error}`);
+            console.error('Error writing file', error);
+            throw new Error('Error writing file');
         }
     }
 
@@ -54,7 +54,7 @@ class CartManager {
 
     async createCart() {
         const newCart = {
-            id: this.idCounter++,
+            id: uuidv4(),
             products: [],
         };
         this.carts.push(newCart);
@@ -70,14 +70,23 @@ class CartManager {
         return cart;
     }
 
+    validateProduct(cart, productId) {
+        if (cart.products.some((p) => p.id === productId)) {
+            throw new Error('Product already exists in the cart');
+        }
+    }
+
     async addProductToCart(cartId, productId, quantity) {
         const cart = this.carts.find((c) => c.id === cartId);
         if (!cart) {
             throw new Error('Cart not found');
         }
 
+        this.validateProduct(cart, productId);
+
         const product = {
-            id: productId,
+            id: uuidv4(),
+            productId: productId,
             quantity: quantity,
         };
         cart.products.push(product);
@@ -85,19 +94,19 @@ class CartManager {
         return product;
     }
 
-    async removeProductFromCart(cartId, productId) {
+    async removeProductFromCart(cartId, id) {
         const cart = this.carts.find((c) => c.id === cartId);
         if (!cart) {
             throw new Error('Cart not found');
         }
-        const productIndex = cart.products.findIndex((p) => p.id === productId);
+        const productIndex = cart.products.findIndex((p) => p.id === id);
         if (productIndex === -1) {
             throw new Error('Product not found in the cart');
         }
         cart.products.splice(productIndex, 1);
         await this.writeToFile();
-        return productId;
+        return id;
     }
 }
 
-export default CartManager;
+export default CartsManager;

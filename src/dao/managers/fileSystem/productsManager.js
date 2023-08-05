@@ -1,3 +1,5 @@
+/* eslint-disable quotes */
+
 // file system
 import fs from 'fs';
 
@@ -33,7 +35,10 @@ class ProductsManager extends EventEmitter {
             'stock',
         ];
         for (let field of requiredFields) {
-            if (!product.hasOwnProperty(field) || !product[field] === '') {
+            if (
+                !Object.prototype.hasOwnProperty.call(product, field) ||
+                !product[field]
+            ) {
                 throw new Error(`Missing required field: ${field}`);
             }
         }

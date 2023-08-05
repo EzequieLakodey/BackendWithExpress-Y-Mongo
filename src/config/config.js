@@ -3,6 +3,6 @@ export const config = {
         port: 8080,
     },
     mongo: {
-        url: 'ROUTE MONGO URL',
+        url: 'mongodb://localhost:27017',
     },
 };

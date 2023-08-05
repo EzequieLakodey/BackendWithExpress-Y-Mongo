@@ -13,7 +13,7 @@ import viewsRouter from './routes/views.router.js';
 import { config } from './config/config.js';
 
 // Utils
-import __dirname from './utils.js';
+import { __dirname } from './utils.js';
 
 // Path
 import path from 'path';

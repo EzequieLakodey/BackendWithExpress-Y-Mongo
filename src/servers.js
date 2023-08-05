@@ -1,7 +1,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { chatModel } from './dao/models/chat.model';
+import { chatModel } from './dao/models/chat.model.js';
 
 let products = [];
 

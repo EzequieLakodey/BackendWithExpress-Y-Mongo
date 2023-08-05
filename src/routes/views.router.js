@@ -1,5 +1,5 @@
 import express from 'express';
-import ProductsManager from '../dao/productsManager.js';
+import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
 const manager = new ProductsManager('products.json');
 const router = express.Router();
 router.get('/', async (req, res) => {

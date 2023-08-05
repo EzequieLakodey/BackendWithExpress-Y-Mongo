@@ -1,9 +1,9 @@
-import CartManager from '../cartManager.js';
+import CartsManager from '../dao/managers/fileSystem/cartsManager.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 
 const router = Router();
-const manager = new CartManager('carts.json');
+const manager = new CartsManager('carts.json');
 router.get('/', async (req, res) => {
     try {
         const carts = await manager.getAllCarts();
