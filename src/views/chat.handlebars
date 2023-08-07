@@ -1,0 +1,15 @@
+<div id='chat-messages'></div>
+
+<form id='chat-form'>
+    <input type='text' id='user-input' placeholder='Enter your name' required />
+    <input
+        type='text'
+        id='message-input'
+        placeholder='Enter your message'
+        required
+    />
+    <button type='submit'>Send</button>
+</form>
+
+<script src='/socket.io/socket.io.js'></script>
+<script src='./js/chat.js'></script>
