@@ -1,9 +1,13 @@
-import { io } from 'socket.io-client';
 const socket = io(); // Initialize socket.io
 
 // Configure socket.io connection
 socket.on('connect', () => {
     console.log('Connected to server');
+});
+
+// Adding Listener for Updating Chat
+socket.on('messageHistory', (messages) => {
+    updateChat(messages);
 });
 
 const updateChat = (messages) => {

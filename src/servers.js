@@ -1,9 +1,13 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import mongoose from 'mongoose';
 import Chat from './dao/models/chat.model.js';
 import { __dirname } from './utils.js';
 import path from 'path';
+
+// Import the `connectDB` function from `dbConnection.js`
+import { connectDB } from './config/dbConnection.js';
 
 let products = [];
 
@@ -18,6 +22,9 @@ const io = new Server(httpServer, {
         origin: '*',
     },
 });
+
+// Connect to MongoDB by calling the `connectDB` function
+connectDB();
 
 io.on('connection', (socket) => {
     console.log('client connected');

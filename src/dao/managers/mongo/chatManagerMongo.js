@@ -6,15 +6,18 @@ class ChatManagerMongo {
     }
 
     async addMessage(user, message) {
+        console.log('Adding message:', user, message);
+
         const newMessage = new this.model({ user, message });
-        let savedMessage;
+
         try {
-            savedMessage = await newMessage.save();
+            const savedMessage = await newMessage.save();
+            console.log('Message saved successfully:', savedMessage);
+            return savedMessage;
         } catch (error) {
             console.log('Error while saving the message:', error);
             throw new Error('Error while saving the message');
         }
-        return savedMessage;
     }
 
     async getMessages() {
