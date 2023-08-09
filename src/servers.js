@@ -38,7 +38,13 @@ io.on('connection', (socket) => {
 
     socket.on('message', async (data) => {
         console.log('data', data);
-        const messageCreated = await Chat.create(data);
+        const newMessage = new Chat({ user: data.user, message: data.message });
+        try {
+            const messageCreated = await newMessage.save();
+            console.log('messageCreated', messageCreated);
+        } catch (error) {
+            console.log('Error while saving the message:', error);
+        }
         const messages = await Chat.find();
         io.emit('messageHistory', messages);
     });
