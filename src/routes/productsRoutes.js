@@ -6,13 +6,19 @@ const router = Router();
 const manager = new ProductsManager('products.json');
 router.get('/', async (req, res) => {
     try {
-        const { limit } = req.query;
-        const products = await manager.getProducts(limit);
+        const { limit, page, sort, query } = req.query;
+        const products = await manager.getProducts({
+            limit,
+            page,
+            sort,
+            query,
+        });
         res.json(products);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;

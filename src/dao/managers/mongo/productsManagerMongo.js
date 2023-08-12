@@ -20,14 +20,29 @@ class ProductsMongo {
         return savedProduct;
     }
 
-    async getProducts(limit) {
-        let products = await this.model.find({});
-        await this.model.find();
-        if (limit) {
-            return products.slice(0, limit);
-        } else {
-            return products;
-        }
+    async getProducts({ limit = 10, page = 1, sort = 'name', query = {} }) {
+        const options = {
+            page: parseInt(page, 10),
+            limit: parseInt(limit, 10),
+            sort: sort,
+        };
+
+        // Convert page and limit to number
+        limit = Number(limit);
+        page = Number(page);
+
+        // Calculate skip
+        const skip = (page - 1) * limit;
+
+        // Handle sorting and query
+        const products = await this.model
+            .find(query)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        return products;
     }
 
     async getProductsById(id) {

@@ -1,7 +1,6 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import mongoose from 'mongoose';
 import Chat from './dao/models/chat.model.js';
 import { __dirname } from './utils.js';
 import path from 'path';

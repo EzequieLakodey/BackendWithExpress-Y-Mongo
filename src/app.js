@@ -1,35 +1,19 @@
-// Express
 import express from 'express';
-
-// Hbs
 import handlebars from 'express-handlebars';
-
-// Routers
+import viewsRouter from './routes/views.router.js';
 import { productsRouter } from './routes/productsRoutes.js';
 import { cartRouter } from './routes/cartRoutes.js';
-import viewsRouter from './routes/views.router.js';
-
-// Config
 import { config } from './config/config.js';
-
-// Utils
 import { __dirname } from './utils.js';
-
-// Path
 import path from 'path';
-
-// Servers
 import { app, httpServer } from './servers.js';
-
-// Mongo Db
 import { connectDB } from './config/dbConnection.js';
 
-// MiddleWares
+/* MODULES */
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '/public')));
-
-/* MODULES */
 
 const port = config.server.port;
 
@@ -39,13 +23,12 @@ httpServer.listen(port, () => {
 
 connectDB();
 
-const hbs = handlebars.create({ defaultLayout: null });
-app.engine('handlebars', hbs.engine);
-app.set('views', __dirname + '/views');
-app.set('view engine', 'handlebars');
+const hbs = handlebars.create({ defaultLayout: null, extname: '.hbs' });
+app.engine('.hbs', hbs.engine);
+app.set('view engine', '.hbs');
+app.set('views', path.join(__dirname, '/views'));
+
 app.use(express.static(__dirname + '/public'));
 app.use('/', viewsRouter);
-
-app.use(viewsRouter);
 app.use('/products', productsRouter);
 app.use('/carts', cartRouter);
