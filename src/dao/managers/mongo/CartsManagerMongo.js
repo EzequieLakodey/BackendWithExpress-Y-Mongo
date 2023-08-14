@@ -35,16 +35,26 @@ class CartManagerMongo {
             throw new Error('Cart not found');
         }
 
-        this.validateProduct(cart, productId);
+        const productIndex = cart.products.findIndex(
+            (p) => p.productId === productId
+        );
+        if (productIndex !== -1) {
+            // If the product exists in the cart, update its quantity
+            cart.products[productIndex].quantity = quantity;
+        } else {
+            // If the product does not exist in the cart, add it
+            this.validateProduct(cart, productId);
 
-        const product = {
-            id: mongoose.Types.ObjectId().toString(),
-            productId,
-            quantity,
-        };
-        cart.products.push(product);
+            const product = {
+                id: mongoose.Types.ObjectId().toString(),
+                productId,
+                quantity,
+            };
+            cart.products.push(product);
+        }
+
         await cart.save();
-        return product;
+        return cart;
     }
 
     async removeProductFromCart(cartId, id) {

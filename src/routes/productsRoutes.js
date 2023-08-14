@@ -1,13 +1,15 @@
 import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
+import ProductsMongo from '../dao/managers/mongo/productsManagerMongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 
 const router = Router();
-const manager = new ProductsManager('products.json');
+const mongoManager = new ProductsMongo();
+const fileManager = new ProductsManager('products.json');
 router.get('/', async (req, res) => {
     try {
         const { limit, page, sort, query } = req.query;
-        const products = await manager.getProducts({
+        const products = await fileManager.getProducts({
             limit,
             page,
             sort,
@@ -22,7 +24,7 @@ router.get('/', async (req, res) => {
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
-        const product = await manager.getProductsById(pid);
+        const product = await fileManager.getProductsById(pid);
         if (product) {
             res.json(product);
         } else {
@@ -35,9 +37,13 @@ router.get('/:pid', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const product = req.body;
-        const newProduct = await manager.addProduct(product);
-        io.emit('new-product', newProduct);
-        res.json(newProduct);
+        const newProductFile = await fileManager.addProduct(product);
+        const newProductMongo = await mongoManager.addProduct(product);
+        io.emit('new-product', newProductFile);
+        res.json({
+            fileSystemProduct: newProductFile,
+            mongoDBProduct: newProductMongo,
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -45,7 +51,7 @@ router.post('/', async (req, res) => {
 router.put('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
-        const updatedProduct = await manager.updateProduct(pid, req.body);
+        const updatedProduct = await fileManager.updateProduct(pid, req.body);
         if (updatedProduct) {
             res.json(updatedProduct);
         } else {
@@ -58,7 +64,7 @@ router.put('/:pid', async (req, res) => {
 router.delete('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
-        const deletedProductId = await manager.deleteProduct(pid);
+        const deletedProductId = await fileManager.deleteProduct(pid);
         if (deletedProductId) {
             io.emit('delete-product', deletedProductId);
             res.json({

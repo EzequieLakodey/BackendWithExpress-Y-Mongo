@@ -16,7 +16,7 @@ class ProductsMongo {
             console.log('Error while savng the product:', error);
             throw new Error('Error while saving the product');
         }
-        this.emit('productAdded', savedProduct);
+
         return savedProduct;
     }
 
