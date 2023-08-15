@@ -9,7 +9,7 @@ const fileManager = new ProductsManager('products.json');
 router.get('/', async (req, res) => {
     try {
         const { limit, page, sort, query } = req.query;
-        const products = await fileManager.getProducts({
+        const products = await mongoManager.getProducts({
             limit,
             page,
             sort,

@@ -21,12 +21,6 @@ class ProductsMongo {
     }
 
     async getProducts({ limit = 10, page = 1, sort = 'name', query = {} }) {
-        const options = {
-            page: parseInt(page, 10),
-            limit: parseInt(limit, 10),
-            sort: sort,
-        };
-
         // Convert page and limit to number
         limit = Number(limit);
         page = Number(page);
@@ -34,13 +28,19 @@ class ProductsMongo {
         // Calculate skip
         const skip = (page - 1) * limit;
 
-        // Handle sorting and query
-        const products = await this.model
-            .find(query)
-            .sort(sort)
-            .skip(skip)
-            .limit(limit)
-            .exec();
+        // Handle sorting
+        let sortObj = {};
+        sortObj[sort] = 1; // 1 for ascending
+
+        // Perform query
+        const pipeline = [
+            { $match: query },
+            { $sort: sortObj },
+            { $skip: skip },
+            { $limit: limit },
+        ];
+
+        const products = await this.model.aggregate(pipeline).exec();
 
         return products;
     }
