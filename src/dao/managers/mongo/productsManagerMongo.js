@@ -20,7 +20,7 @@ class ProductsMongo {
         return savedProduct;
     }
 
-    async getProducts({ limit = 10, page = 1, sort = 'name', query = {} }) {
+    async getProducts({ limit = 10, page = 1, sort = 'price', query = {} }) {
         // Convert page and limit to number
         limit = Number(limit);
         page = Number(page);
@@ -30,7 +30,8 @@ class ProductsMongo {
 
         // Handle sorting
         let sortObj = {};
-        sortObj[sort] = 1; // 1 for ascending
+        const sortField = sort === '-price' ? 'price' : sort;
+        sortObj[sortField] = sort === '-price' ? -1 : 1; // -1 for descending, 1 for ascending
 
         // Perform query
         const pipeline = [
@@ -39,6 +40,8 @@ class ProductsMongo {
             { $skip: skip },
             { $limit: limit },
         ];
+
+        console.log(JSON.stringify(pipeline));
 
         const products = await this.model.aggregate(pipeline).exec();
 

@@ -8,7 +8,16 @@ const mongoManager = new ProductsMongo();
 const fileManager = new ProductsManager('products.json');
 router.get('/', async (req, res) => {
     try {
-        const { limit, page, sort, query } = req.query;
+        let { limit, page, sort, query } = req.query;
+
+        if (query) {
+            try {
+                query = JSON.parse(decodeURIComponent(query));
+            } catch (error) {
+                console.log('Error parsing query parameter: ', error);
+            }
+        }
+
         const products = await mongoManager.getProducts({
             limit,
             page,
