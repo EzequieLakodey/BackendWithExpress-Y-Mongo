@@ -2,7 +2,7 @@
 import { productsModel } from '../../models/products.model.js';
 
 /* MODULES */
-class ProductsMongo {
+class ProductsManagerMongo {
     constructor() {
         this.model = productsModel;
     }
@@ -68,4 +68,4 @@ class ProductsMongo {
     }
 }
 
-export default ProductsMongo;
+export default ProductsManagerMongo;

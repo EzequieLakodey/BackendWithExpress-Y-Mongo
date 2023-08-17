@@ -1,9 +1,10 @@
-import Cart from '../../models/carts.model.js';
+import { cartsModel } from '../../models/carts.model.js';
 import mongoose from 'mongoose';
+/* MODULES */
 
-class CartManagerMongo {
+class CartsManagerMongo {
     constructor() {
-        this.model = Cart;
+        this.model = cartsModel;
     }
 
     async getAllCarts() {
@@ -11,12 +12,17 @@ class CartManagerMongo {
     }
 
     async createCart() {
-        const newCart = new this.model({
-            id: mongoose.Types.ObjectId().toString(),
-            products: [],
-        });
-        await newCart.save();
-        return newCart;
+        try {
+            console.log('Creating new cart...');
+            const newCart = await this.model.create({
+                products: [],
+            });
+            console.log('New cart created ', newCart);
+            return newCart;
+        } catch (error) {
+            console.log('Error creating new cart: ', error);
+            throw error;
+        }
     }
 
     async getCart(id) {
@@ -74,4 +80,4 @@ class CartManagerMongo {
     }
 }
 
-export default CartManagerMongo;
+export default CartsManagerMongo;

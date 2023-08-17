@@ -2,13 +2,12 @@ import express from 'express';
 import handlebars from 'express-handlebars';
 import viewsRouter from './routes/views.router.js';
 import { productsRouter } from './routes/productsRoutes.js';
-import { cartRouter } from './routes/cartRoutes.js';
+import { cartRouter } from './routes/cartsRoutes.js';
 import { config } from './config/config.js';
 import { __dirname } from './utils.js';
 import path from 'path';
 import { app, httpServer } from './servers.js';
 import { connectDB } from './config/dbConnection.js';
-
 /* MODULES */
 
 app.use(express.json());

@@ -54,7 +54,8 @@ class ProductsManager extends EventEmitter {
 
     async readFromFile() {
         try {
-            const data = await fs.promises.readFile(this.path);
+            const data = await fs.promises.readFile(this.path, 'utf-8');
+            return data ? JSON.parse(data) : [];
             const json = JSON.parse(data);
             if (Array.isArray(json)) {
                 this.products = json;

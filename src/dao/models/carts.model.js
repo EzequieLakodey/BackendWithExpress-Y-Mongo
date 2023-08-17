@@ -1,11 +1,7 @@
 import mongoose from 'mongoose';
+import { cartsCollection } from '../../constants/index.js';
 
-const cartSchema = new mongoose.Schema({
-    id: {
-        type: String,
-        required: true,
-        unique: true,
-    },
+const cartsSchema = new mongoose.Schema({
     products: [
         {
             id: {
@@ -25,6 +21,4 @@ const cartSchema = new mongoose.Schema({
     ],
 });
 
-const Cart = mongoose.model('Cart', cartSchema);
-
-export default Cart;
+export const cartsModel = mongoose.model(cartsCollection, cartsSchema);

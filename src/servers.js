@@ -1,15 +1,14 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import Chat from './dao/models/chat.model.js';
+import { chatModel } from './dao/models/chat.model.js';
 import { __dirname } from './utils.js';
 import path from 'path';
-
-// Import the `connectDB` function from `dbConnection.js`
 import { connectDB } from './config/dbConnection.js';
 
-let products = [];
+/* MODULES */
 
+let products = [];
 const app = express();
 
 // Configure static file serving
@@ -29,7 +28,7 @@ io.on('connection', (socket) => {
     console.log('client connected');
 
     socket.on('realtimeproducts', async (msg) => {
-        const messages = await Chat.find();
+        const messages = await chatModel.find();
         socket.emit('messagesHistory', messages);
         socket.emit('productsData', products);
         socket.broadcast.emit('newUser', msg);
@@ -37,14 +36,17 @@ io.on('connection', (socket) => {
 
     socket.on('message', async (data) => {
         console.log('data', data);
-        const newMessage = new Chat({ user: data.user, message: data.message });
+        const newMessage = new chatModel({
+            user: data.user,
+            message: data.message,
+        });
         try {
             const messageCreated = await newMessage.save();
             console.log('messageCreated', messageCreated);
         } catch (error) {
             console.log('Error while saving the message:', error);
         }
-        const messages = await Chat.find();
+        const messages = await chatModel.find();
         io.emit('messageHistory', messages);
     });
 

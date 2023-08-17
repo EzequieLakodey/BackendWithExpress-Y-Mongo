@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-const productsCollection = 'products';
+import { productsCollection } from '../../constants/index.js';
 
 const productSchema = new mongoose.Schema({
     title: {
@@ -34,4 +34,4 @@ const productSchema = new mongoose.Schema({
     },
 });
 
-export const productsModel = mongoose.model('products', productSchema);
+export const productsModel = mongoose.model(productsCollection, productSchema);

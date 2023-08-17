@@ -1,11 +1,10 @@
-import CartsManager from '../dao/managers/fileSystem/cartsManager.js';
+import CartsManagerMongo from '../dao/managers/mongo/CartsManagerMongo.js';
 import { Router } from 'express';
-import { productsModel } from '../dao/models/products.model.js';
 import { io } from '../servers.js';
 
 const router = Router();
 
-const manager = new CartsManager('carts.json');
+const manager = new CartsManagerMongo();
 router.get('/', async (req, res) => {
     try {
         const { limit = 10, page = 1, sort, query } = req.query;
@@ -20,8 +19,8 @@ router.get('/', async (req, res) => {
         }
         pipeline.push({ $skip: skip }, { $limit: limit });
 
-        const products = await productsModel.aggregate(pipeline);
-        res.json(products);
+        const carts = await manager.getAllCarts(pipeline);
+        res.json(carts);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
