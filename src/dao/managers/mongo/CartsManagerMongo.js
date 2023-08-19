@@ -25,7 +25,44 @@ class CartsManagerMongo {
         }
     }
 
+    async updateCart(cartId, products) {
+        const cart = await this.getCart(cartId);
+        if (!cart) {
+            throw new Error('Cart not found');
+        }
+        cart.products = products;
+        await cart.save();
+        return cart;
+    }
+
+    async updateProductQuantity(cartId, productId, quantity) {
+        const cart = await this.getCart(cartId);
+        if (!cart) {
+            throw new Error('Cart not found');
+        }
+        const product = cart.products.find((p) => p.productId === productId);
+        if (!product) {
+            throw new Error('Product not found in cart');
+        }
+        product.quantity = quantity;
+        await cart.save();
+        return cart;
+    }
+
+    async removeAllProducts(cartId) {
+        const cart = await this.getCart(cartId);
+        if (!cart) {
+            throw new Error('Cart not found');
+        }
+        cart.products = [];
+        await cart.save();
+        return cart;
+    }
+
     async getCart(id) {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new Error('Invalid Cart ID');
+        }
         return this.model.findById(id);
     }
 
@@ -41,6 +78,10 @@ class CartsManagerMongo {
             throw new Error('Cart not found');
         }
 
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            throw new Error('Invalid Product ID');
+        }
+
         const productIndex = cart.products.findIndex(
             (p) => p.productId === productId
         );
@@ -52,8 +93,8 @@ class CartsManagerMongo {
             this.validateProduct(cart, productId);
 
             const product = {
-                id: mongoose.Types.ObjectId().toString(),
-                productId,
+                product: new mongoose.Types.ObjectId().toString(),
+
                 quantity,
             };
             cart.products.push(product);

@@ -26,19 +26,9 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
-    try {
-        const newCart = await manager.createCart();
-        io.emit('new-cart', newCart);
-        res.json(newCart);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 router.get('/:cid', async (req, res) => {
     try {
-        const cid = Number(req.params.cid);
+        const cid = req.params.cid;
         const cart = await manager.getCart(cid);
         if (cart) {
             res.json(cart);
@@ -50,25 +40,24 @@ router.get('/:cid', async (req, res) => {
     }
 });
 
-router.post('/:cid/product/:pid', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
-        const cid = Number(req.params.cid);
-        const pid = req.params.pid;
-        const { quantity } = req.body;
-        const addedProduct = await manager.addProductToCart(cid, pid, quantity);
-        io.emit('add-product-to-cart', { cid, pid, quantity });
-        res.json(addedProduct);
+        const newCart = await manager.createCart();
+        io.emit('new-cart', newCart);
+        res.json(newCart);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// DELETE /api/carts/:cid/products/:pid
-router.delete('/:cid/products/:pid', async (req, res) => {
+router.post('/:cid/products/:pid', async (req, res) => {
     try {
-        const { cid, pid } = req.params;
-        await manager.removeProductFromCart(cid, pid);
-        res.json({ message: 'Product removed from cart' });
+        const cid = req.params.cid;
+        const pid = req.params.pid;
+        const { quantity } = req.body;
+        const addedProduct = await manager.addProductToCart(cid, pid, quantity);
+        io.emit('add-product-to-cart', { cid, pid, quantity });
+        res.json(addedProduct);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -85,6 +74,53 @@ router.put('/:cid/products/:pid', async (req, res) => {
             quantity
         );
         res.json(updatedProduct);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.put('/:cid', async (req, res) => {
+    try {
+        const { cid } = req.params;
+        const { products } = req.body;
+        const updatedCart = await manager.updateCart(cid, products);
+        res.json(updatedCart);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.put('/:cid/products/:pid', async (req, res) => {
+    try {
+        const { cid, pid } = req.params;
+        const { quantity } = req.body;
+        const updatedCart = await manager.updateProductQuantity(
+            cid,
+            pid,
+            quantity
+        );
+        res.json(updatedCart);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// DELETE /api/carts/:cid/products/:pid
+router.delete('/:cid/products/:pid', async (req, res) => {
+    try {
+        const { cid, pid } = req.params;
+        await manager.removeProductFromCart(cid, pid);
+        res.json({ message: 'Product removed from cart' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.delete('/:cid', async (req, res) => {
+    try {
+        const { cid } = req.params;
+        const updatedCart = await manager.removeAllProducts(cid);
+        res.json(updatedCart);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

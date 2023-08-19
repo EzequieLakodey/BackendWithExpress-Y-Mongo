@@ -4,15 +4,12 @@ import { cartsCollection } from '../../constants/index.js';
 const cartsSchema = new mongoose.Schema({
     products: [
         {
-            id: {
+            product: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Product',
                 required: true,
             },
-            productId: {
-                type: String,
-                required: true,
-            },
+
             quantity: {
                 type: Number,
                 required: true,
