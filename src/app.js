@@ -30,4 +30,4 @@ app.set('views', path.join(__dirname, '/views'));
 app.use(express.static(__dirname + '/public'));
 app.use('/', viewsRouter);
 app.use('/products', productsRouter);
-app.use('/carts', cartRouter);
+app.use('/cart', cartRouter);
