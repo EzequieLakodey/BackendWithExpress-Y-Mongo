@@ -1,4 +1,3 @@
-// models
 import { productsModel } from '../../models/products.model.js';
 
 /* MODULES */

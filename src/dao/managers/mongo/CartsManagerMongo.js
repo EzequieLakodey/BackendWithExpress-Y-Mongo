@@ -1,10 +1,16 @@
 import { cartsModel } from '../../models/carts.model.js';
 import mongoose from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
+
 /* MODULES */
 
 class CartsManagerMongo {
     constructor() {
         this.model = cartsModel;
+    }
+
+    async getTotalCarts() {
+        return this.model.countDocuments();
     }
 
     async getAllCarts() {
@@ -15,12 +21,13 @@ class CartsManagerMongo {
         try {
             console.log('Creating new cart...');
             const newCart = await this.model.create({
+                id: uuidv4(),
                 products: [],
             });
             console.log('New cart created ', newCart);
             return newCart;
         } catch (error) {
-            console.log('Error creating new cart: ', error);
+            console.log('Error creating  new cart: ', error);
             throw error;
         }
     }
@@ -93,8 +100,7 @@ class CartsManagerMongo {
             this.validateProduct(cart, productId);
 
             const product = {
-                product: new mongoose.Types.ObjectId().toString(),
-
+                product: productId,
                 quantity,
             };
             cart.products.push(product);

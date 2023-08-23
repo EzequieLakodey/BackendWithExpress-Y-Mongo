@@ -1,21 +1,18 @@
 import mongoose from 'mongoose';
 import { cartsCollection } from '../../constants/index.js';
 
-const cartsSchema = new mongoose.Schema({
-    products: [
-        {
-            product: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product',
-                required: true,
-            },
+/* modules */
 
-            quantity: {
-                type: Number,
-                required: true,
-            },
-        },
-    ],
+const cartsSchema = new mongoose.Schema({
+    id: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    products: {
+        type: [],
+        default: [],
+    },
 });
 
 export const cartsModel = mongoose.model(cartsCollection, cartsSchema);

@@ -20,7 +20,25 @@ router.get('/', async (req, res) => {
         pipeline.push({ $skip: skip }, { $limit: limit });
 
         const carts = await manager.getAllCarts(pipeline);
-        res.json(carts);
+        const totalCarts = await manager.getTotalCarts();
+        const totalPages = Math.ceil(totalCarts / limit);
+        const hasPrevPage = page > 1;
+        const hasNextPage = page < totalPages;
+        const prevPage = hasPrevPage ? page - 1 : null;
+        const nextPage = hasNextPage ? page + 1 : null;
+
+        res.json({
+            status: 'success',
+            payload: carts,
+            totalPages: totalPages,
+            prevPage: prevPage,
+            nextPage: nextPage,
+            page: page,
+            hasPrevPage: hasPrevPage,
+            hasNextPage: hasNextPage,
+            prevLink: hasPrevPage ? `/carts?page=${prevPage}` : null,
+            nextLink: hasNextPage ? `/carts?page=${nextPage}` : null,
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
