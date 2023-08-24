@@ -19,6 +19,11 @@ class ProductsManagerMongo {
         return savedProduct;
     }
 
+    async getTotalProducts() {
+        const total = await this.model.countDocuments();
+        return total;
+    }
+
     async getProducts({ limit = 10, page = 1, sort = 'price', query = {} }) {
         // Convert page and limit to number
         limit = Number(limit);

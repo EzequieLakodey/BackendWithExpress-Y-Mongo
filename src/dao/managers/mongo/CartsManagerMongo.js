@@ -1,11 +1,21 @@
-import { cartsModel } from '../../models/carts.model.js';
 import mongoose from 'mongoose';
+import { cartsModel } from '../../models/carts.model.js';
+import { productsModel } from '../../models/products.model.js';
 
 /* MODULES */
 
 class CartsManagerMongo {
     constructor() {
         this.model = cartsModel;
+        this.productModel = productsModel;
+    }
+
+    async validateProduct(productId) {
+        try {
+            const product = await this.productModel.findById(productId);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async getTotalCarts() {
@@ -70,6 +80,7 @@ class CartsManagerMongo {
     }
 
     async addProductToCart(cartId, productId, quantity) {
+        this.validateProduct(productId);
         const cart = await this.getCart(cartId);
         if (!cart) {
             throw new Error('Cart not found');
@@ -90,7 +101,7 @@ class CartsManagerMongo {
             this.validateProduct(cart, productId);
 
             const product = {
-                product: new mongoose.Types.ObjectId().toString(),
+                product: productId,
 
                 quantity,
             };
