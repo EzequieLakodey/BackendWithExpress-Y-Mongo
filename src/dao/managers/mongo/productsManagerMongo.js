@@ -54,6 +54,7 @@ class ProductsManagerMongo {
 
     async getProductsById(id) {
         let product = await this.model.findById(id);
+        console.log(product);
         return product;
     }
 

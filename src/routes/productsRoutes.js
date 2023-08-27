@@ -8,10 +8,7 @@ const mongoManager = new ProductsMongo();
 const fileManager = new ProductsManager('products.json');
 router.get('/', async (req, res) => {
     try {
-        let { limit = 10, page = 1, sort, query } = req.query;
-        limit = Number(limit);
-        page = Number(page);
-        const skip = (page - 1) * limit;
+        let { limit, page, sort, query } = req.query;
 
         if (query) {
             try {
@@ -27,26 +24,7 @@ router.get('/', async (req, res) => {
             sort,
             query,
         });
-
-        const totalProducts = await mongoManager.getTotalProducts();
-        const totalPages = Math.ceil(totalProducts / limit);
-        const hasPrevPage = page > 1;
-        const hasNextPage = page < totalPages;
-        const prevPage = hasPrevPage ? page - 1 : null;
-        const nextPage = hasNextPage ? page + 1 : null;
-
-        res.json({
-            status: 'success',
-            payload: products,
-            totalPages: totalPages,
-            prevPage: prevPage,
-            nextPage: nextPage,
-            page: page,
-            hasPrevPage: hasPrevPage,
-            hasNextPage: hasNextPage,
-            prevLink: hasPrevPage ? `/products?page=${prevPage}` : null,
-            nextLink: hasNextPage ? `/products?page=${nextPage}` : null,
-        });
+        res.render('products', { products });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -55,9 +33,10 @@ router.get('/', async (req, res) => {
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
-        const product = await fileManager.getProductsById(pid);
+        const product = await mongoManager.getProductsById(pid);
         if (product) {
-            res.json(product);
+            res.render('productsDetails', { product });
+            console.log(product);
         } else {
             res.status(404).json({ error: 'Product not found' });
         }
