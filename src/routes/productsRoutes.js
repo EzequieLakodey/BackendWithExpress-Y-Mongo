@@ -35,8 +35,7 @@ router.get('/:pid', async (req, res) => {
         const { pid } = req.params;
         const product = await mongoManager.getProductsById(pid);
         if (product) {
-            res.render('productsDetails', { product });
-            console.log(product);
+            res.render('productsDetails', { product: product.toObject() });
         } else {
             res.status(404).json({ error: 'Product not found' });
         }

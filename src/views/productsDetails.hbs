@@ -1,9 +1,9 @@
-<h1>{{title}}</h1>
-<p>{{description}}</p>
-<p>Price: ${{price}}</p>
-<p>Category: {{category}}</p>
-<button onclick="addToCart('{{_id}}')">Add to cart</button>
-
-<script src='/socket.io/socket.io.js'></script>
-
-<script type='module' src='/js/index.js'></script>
+<h1>title: {{product.title}}</h1>
+<div>
+    <img src='{{product.thumbnail}}' alt='product thumbnail' />
+    <p>price: ${{product.price}}</p>
+    <p>description: {{product.description}}</p>
+    <p>category: {{product.category}}</p>
+    <p>stock: {{product.stock}}</p>
+    <p>code: {{product.code}}</p>
+</div>
