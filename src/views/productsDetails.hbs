@@ -1,12 +1,33 @@
-<h1>title: {{product.title}}</h1>
-<div>
-    <img src='{{product.thumbnail}}' alt='product thumbnail' />
-    <p>price: ${{product.price}}</p>
-    <p>description: {{product.description}}</p>
-    <p>category: {{product.category}}</p>
-    <p>stock: {{product.stock}}</p>
-    <p>code: {{product.code}}</p>
-    <button class='add-to-cart' data-product-id='{{product._id}}'>Add to Cart</button>
-</div>
+<article>
+    <div>
+        <h1>title: {{product.title}}</h1>
+    </div>
+    <div>
+        <img src='{{product.thumbnail}}' alt='product thumbnail' />
+    </div>
+    <div>
+        <p>price: ${{product.price}}</p>
+    </div>
+    <div>
+        <p>description: {{product.description}}</p>
+    </div>
+    <div>
+        <p>category: {{product.category}}</p>
+    </div>
+    <div>
+        <p>stock: {{product.stock}}</p>
+    </div>
+    <div>
+        <p>code: {{product.code}}</p>
+    </div>
+    <div>
+
+        <button
+            class='add-to-cart'
+            data-product-id='{{product._id}}'
+            data-cart-id='{{cart._id}}'
+        >Add to Cart</button>
+    </div>
+</article>
 
 <script src='/js/addProductsToCarts.js'></script>

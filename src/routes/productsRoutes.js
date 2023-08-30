@@ -8,8 +8,9 @@ const mongoManager = new ProductsMongo();
 const fileManager = new ProductsManager('products.json');
 router.get('/', async (req, res) => {
     try {
-        let { limit, page, sort, query } = req.query;
-
+        let { limit = '10', page = '1', sort, query } = req.query;
+        limit = Number(limit);
+        page = Number(page);
         if (query) {
             try {
                 query = JSON.parse(decodeURIComponent(query));
@@ -17,19 +18,26 @@ router.get('/', async (req, res) => {
                 console.log('Error parsing query parameter: ', error);
             }
         }
-
         const products = await mongoManager.getProducts({
-            limit,
+            limit: limit + 1,
             page,
             sort,
             query,
         });
-        res.render('products', { products });
+        let prevPage = null;
+        let nextPage = null;
+        if (page > 1) {
+            prevPage = page - 1;
+        }
+        if (products.length === limit + 1) {
+            nextPage = page + 1;
+            products.pop();
+        }
+        res.render('products', { products, prevPage, nextPage });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
-
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;

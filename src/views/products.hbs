@@ -1,12 +1,22 @@
-<h1>All Products</h1>
 <main>
+    <div>
+        {{#if prevPage}}
+            <a href='/api/products?page={{prevPage}}'>Previous page</a>
+        {{/if}}
+    </div>
+    <div>
+        {{#if nextPage}}
+            <a href='/api/products?page={{nextPage}}'>Next page</a>
+        {{/if}}
+    </div>
+    <h1>Products</h1>
     {{#each products}}
         <div>
             <ul>
                 <li>
                     <div>
                         <h2><a
-                                href='/products/{{this._id}}'
+                                href='/api/products/{{this._id}}'
                             >{{this.title}}</a></h2>
                     </div>
                 </li>
@@ -26,14 +36,10 @@
                         {{this._id}}
                     </div>
                 </li>
-                <li>
-                    <div>
-                        <button onclick="addToCart('{{this.id}}')">Add to cart</button>
-                    </div>
-                </li>
             </ul>
         </div>
     {{/each}}
 </main>
+
 <script src='/socket.io/socket.io.js'></script>
 <script type='module' src='/js/index.js'></script>
