@@ -1,4 +1,4 @@
-import CartsManagerMongo from '../dao/managers/mongo/CartsManagerMongo.js';
+import CartsManagerMongo from '../dao/managers/mongo/cartsManagerMongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 
@@ -49,7 +49,7 @@ router.get('/:cid', async (req, res) => {
         const cid = req.params.cid;
         const cart = await manager.getCart(cid);
         if (cart) {
-            res.json(cart);
+            res.render('cartsDetails', { cart: cart.toObject() });
         } else {
             res.status(404).json({ error: 'Cart not found' });
         }
@@ -144,4 +144,4 @@ router.delete('/:cid', async (req, res) => {
     }
 });
 
-export { router as cartRouter };
+export { router as cartsRouter };

@@ -2,7 +2,7 @@ import express from 'express';
 import handlebars from 'express-handlebars';
 import viewsRouter from './routes/views.router.js';
 import { productsRouter } from './routes/productsRoutes.js';
-import { cartRouter } from './routes/cartsRoutes.js';
+import { cartsRouter } from './routes/cartsRoutes.js';
 import { config } from './config/config.js';
 import { __dirname } from './utils.js';
 import path from 'path';
@@ -29,5 +29,5 @@ app.set('views', path.join(__dirname, '/views'));
 
 app.use(express.static(__dirname + '/public'));
 app.use('/', viewsRouter);
-app.use('/products', productsRouter);
-app.use('/cart', cartRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/carts', cartsRouter);

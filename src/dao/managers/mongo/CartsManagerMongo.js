@@ -11,10 +11,9 @@ class CartsManagerMongo {
     }
 
     async validateProduct(productId) {
-        try {
-            const product = await this.productModel.findById(productId);
-        } catch (error) {
-            console.log(error);
+        const product = await this.productModel.findById(productId);
+        if (!product) {
+            throw new Error('Product not found');
         }
     }
 
@@ -76,20 +75,18 @@ class CartsManagerMongo {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new Error('Invalid Cart ID');
         }
-        return this.model.findById(id);
+        return this.model.findById(id).populate('products.product');
     }
 
     async addProductToCart(cartId, productId, quantity) {
         this.validateProduct(productId);
-        const cart = await this.getCart(cartId);
+        let cart = await this.getCart(cartId);
         if (!cart) {
-            throw new Error('Cart not found');
+            cart = await this.createCart();
         }
-
         if (!mongoose.Types.ObjectId.isValid(productId)) {
             throw new Error('Invalid Product ID');
         }
-
         const productIndex = cart.products.findIndex(
             (p) => p.productId === productId
         );
@@ -107,7 +104,6 @@ class CartsManagerMongo {
             };
             cart.products.push(product);
         }
-
         await cart.save();
         return cart;
     }
