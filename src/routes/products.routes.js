@@ -1,10 +1,10 @@
 import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
-import ProductsMongo from '../dao/managers/mongo/productsManagerMongo.js';
+import ProductsManagerMongo from '../dao/managers/mongo/products.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 
 const router = Router();
-const mongoManager = new ProductsMongo();
+const mongoManager = new ProductsManagerMongo();
 const fileManager = new ProductsManager('products.json');
 router.get('/', async (req, res) => {
     try {

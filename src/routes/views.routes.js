@@ -1,7 +1,10 @@
-import express from 'express';
+import { Router } from 'express';
+import { checkUserAuthenticated, showLoginView } from '../middlewares/auth.js';
 import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
+/* MODULES */
+
 const manager = new ProductsManager('products.json');
-const router = express.Router();
+const router = Router();
 
 router.get('/', async (req, res) => {
     const products = await manager.getProducts();
@@ -17,4 +20,4 @@ router.get('/chat', (req, res) => {
     res.render('chat');
 });
 
-export default router;
+export { router as viewsRouter };
