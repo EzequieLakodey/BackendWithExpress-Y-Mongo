@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { usersService } from '../dao/index.js';
 import bcrypt from 'bcrypt';
+import { checkUserAuthenticated, showLoginView } from '../middlewares/auth.js';
 
 const router = Router();
 
@@ -50,7 +51,7 @@ router.post('/login', async (req, res) => {
             first_name: user.first_name,
             email: user.email,
         };
-        res.redirect('/profile');
+        res.redirect('/api/products');
     } catch (error) {
         res.status(500).render('signup', { error: error.message });
     }
@@ -75,7 +76,7 @@ router.get('/logout', (req, res) => {
                 user: req.session.userInfo,
                 error: 'No se pudo cerrar la sesion',
             });
-        res.redirect('/');
+        res.redirect('/api/sessions/login');
     });
 });
 
