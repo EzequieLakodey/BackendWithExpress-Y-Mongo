@@ -2,40 +2,38 @@ import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
 import ProductsManagerMongo from '../dao/managers/mongo/products.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
+import { requireLogin } from './sessions.routes.js';
 
 const router = Router();
 const mongoManager = new ProductsManagerMongo();
 const fileManager = new ProductsManager('products.json');
+
 router.get('/', async (req, res) => {
+    let first_name, email;
+
+    if (req.session && req.session.userInfo) {
+        ({ first_name, email } = req.session.userInfo);
+    }
+
+    // Continue with your code. `first_name` and `email` will be undefined if the user is not registered.
     try {
-        let { limit = '10', page = '1', sort, query } = req.query;
-        limit = Number(limit);
-        page = Number(page);
-        if (query) {
-            try {
-                query = JSON.parse(decodeURIComponent(query));
-            } catch (error) {
-                console.log('Error parsing query parameter: ', error);
-            }
-        }
-        const products = await mongoManager.getProducts({
-            limit: limit + 1,
-            page,
-            sort,
-            query,
-        });
-        let prevPage = null;
-        let nextPage = null;
-        if (page > 1) {
-            prevPage = page - 1;
-        }
-        if (products.length === limit + 1) {
-            nextPage = page + 1;
-            products.pop();
-        }
-        res.render('products', { products, prevPage, nextPage });
+        const page = parseInt(req.query.page) || 1;
+        const size = parseInt(req.query.size) || 10;
+        const products = await mongoManager.getProducts({}, page, size);
+        const total = await mongoManager.getTotalProducts(); // use getTotalProducts instead of countProducts
+        const pages = Math.ceil(total / size);
+        const prevPage = page - 1 > 0 ? page - 1 : null;
+        const nextPage = page + 1 <= pages ? page + 1 : null;
+        res.render('products', {
+            products,
+            prevPage,
+            nextPage,
+            first_name,
+            email,
+        }); // pass user data to view
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error(error);
+        res.status(500).send('There was an error getting the products');
     }
 });
 router.get('/:pid', async (req, res) => {

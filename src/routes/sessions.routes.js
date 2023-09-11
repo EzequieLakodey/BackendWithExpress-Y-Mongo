@@ -25,6 +25,9 @@ router.post('/signup', async (req, res) => {
         }
         // Hash the password
         signupForm.password = await bcrypt.hash(signupForm.password, 10);
+        // Set the role based on the email
+        signupForm.role =
+            signupForm.email === 'admin@coder.com' ? 'admin' : 'user';
         // Save the user to the database
         const result = await usersService.save(signupForm);
         res.render('login', { message: 'Usuario registrado' });
@@ -36,46 +39,57 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const loginForm = req.body;
-        // Check if the user exists and validate the password
         const user = await usersService.getByEmail(loginForm.email);
-        if (
-            !user ||
-            !(await bcrypt.compare(loginForm.password, user.password))
-        ) {
-            return res.status(401).render('login', {
-                error: 'Credenciales inválidas',
-            });
+        if (!user || !bcrypt.compareSync(loginForm.password, user.password)) {
+            return res
+                .status(401)
+                .render('login', { error: 'Invalid email or password' });
         }
-        // Set the user info in the session
+
+        // Set the user role in the session from the user object
         req.session.userInfo = {
-            first_name: user.first_name,
+            ...req.session.userInfo,
+            role: user.role,
             email: user.email,
+            first_name: user.first_name,
         };
+
         res.redirect('/api/products');
     } catch (error) {
-        res.status(500).render('signup', { error: error.message });
+        console.error(error);
+        res.status(500).send({ error: error.toString() });
     }
 });
 
-const requireLogin = (req, res, next) => {
+export const requireLogin = (req, res, next) => {
     if (!req.session.userInfo) {
-        return res.redirect('/login');
+        return res.redirect('/api/sessions/login');
     }
     next();
 };
 
 router.get('/profile', requireLogin, (req, res) => {
+    // After the first_name and email are retrieved from the session
     const { first_name, email } = req.session.userInfo;
+
+    // Add a console log to print the first_name and email
+    console.log(
+        'first_name and email retrieved from session:',
+        first_name,
+        email
+    );
     res.render('profile', { first_name, email });
 });
 
-router.get('/logout', (req, res) => {
+router.post('/logout', (req, res) => {
     req.session.destroy((error) => {
-        if (error)
+        if (error) {
             return res.status(500).render('profile', {
-                user: req.session.userInfo,
-                error: 'No se pudo cerrar la sesion',
+                error: 'Failed to destroy the session.',
             });
+        }
+
+        res.clearCookie('connect.sid');
         res.redirect('/api/sessions/login');
     });
 });

@@ -31,19 +31,19 @@ app.engine('.hbs', hbs.engine);
 app.set('view engine', '.hbs');
 app.set('views', path.join(__dirname, '/views'));
 
-app.use(express.static(__dirname + '/public'));
-app.use(viewsRouter);
-app.use('/api/products', productsRouter);
-app.use('/api/carts', cartsRouter);
 app.use(
     session({
         store: MongoStore.create({
-            mongoUrl: config.mongo.url,
+            mongoUrl: `${config.mongo.url}/ecommerce`,
         }),
         secret: config.server.secretSession,
         resave: true,
         saveUninitialized: true,
     })
 );
+app.use(express.static(__dirname + '/public'));
+app.use(viewsRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/carts', cartsRouter);
 
 app.use('/api/sessions', sessionsRouter);
