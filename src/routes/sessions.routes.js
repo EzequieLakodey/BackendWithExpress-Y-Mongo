@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { usersService } from '../dao/index.js';
 import bcrypt from 'bcrypt';
 import { checkUserAuthenticated, showLoginView } from '../middlewares/auth.js';
+import passport from 'passport';
 
 const router = Router();
 
@@ -92,6 +93,21 @@ router.post('/logout', (req, res) => {
         res.clearCookie('connect.sid');
         res.redirect('/api/sessions/login');
     });
+
+    // Other existing code...
 });
+
+// GitHub authentication route
+router.get('/github', passport.authenticate('github'));
+
+// GitHub authentication callback route
+router.get(
+    '/github-callback',
+    passport.authenticate('github', { failureRedirect: '/login' }),
+    (req, res) => {
+        // Successful authentication, redirect to your desired page.
+        res.redirect('/');
+    }
+);
 
 export { router as sessionsRouter };

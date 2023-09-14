@@ -11,7 +11,8 @@ import { sessionsRouter } from './routes/sessions.routes.js';
 import { viewsRouter } from './routes/views.routes.js';
 import { productsRouter } from './routes/products.routes.js';
 import { cartsRouter } from './routes/carts.routes.js';
-
+import passport from 'passport';
+import { initializePassport } from './config/passportConfig.js';
 /* MODULES */
 
 app.use(express.json());
@@ -41,6 +42,11 @@ app.use(
         saveUninitialized: true,
     })
 );
+
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express.static(__dirname + '/public'));
 app.use(viewsRouter);
 app.use('/api/products', productsRouter);
