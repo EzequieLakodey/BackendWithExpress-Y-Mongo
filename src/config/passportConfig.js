@@ -67,23 +67,23 @@ export const initializePassport = () => {
             {
                 clientID: config.github.clientId,
                 clientSecret: config.github.clientSecret,
-                callbackUrl: config.github.callbackUrl,
+                callbackURL: config.github.callbackUrl,
             },
-            async (accesstoken, refreshToken, profile, done) => {
+            async (accessToken, refreshToken, profile, done) => {
                 try {
-                    // console.log("profile", profile);
-                    //verificar si ya el usuario esta registrado en nuestra plataforma
                     const user = await usersService.getByEmail(
-                        profile.username
+                        profile.emails
+                            ? profile.emails[0].value
+                            : profile.username
                     );
                     if (!user) {
                         const newUser = {
-                            first_name: '',
-                            email: profile.username,
-                            password: createHash(profile.id),
+                            email: profile.email,
+                            first_name: profile.username,
+                            password: process.env.DEFAULT_PWD || 'githubuser', //default password for github users
                         };
                         const userCreated = await usersService.save(newUser);
-                        return done(null, userCreated); //En este punto passport completa el proceso de manera
+                        return done(null, userCreated);
                     } else {
                         return done(null, user);
                     }

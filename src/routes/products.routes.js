@@ -2,7 +2,6 @@ import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
 import ProductsManagerMongo from '../dao/managers/mongo/products.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
-import { requireLogin } from './sessions.routes.js';
 
 const router = Router();
 const mongoManager = new ProductsManagerMongo();
@@ -25,11 +24,10 @@ router.get('/', async (req, res) => {
         const prevPage = page - 1 > 0 ? page - 1 : null;
         const nextPage = page + 1 <= pages ? page + 1 : null;
         res.render('products', {
+            ...req.session.userInfo,
             products,
             prevPage,
             nextPage,
-            first_name,
-            email,
         }); // pass user data to view
     } catch (error) {
         console.error(error);

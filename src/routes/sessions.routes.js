@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { usersService } from '../dao/index.js';
 import bcrypt from 'bcrypt';
-import { checkUserAuthenticated, showLoginView } from '../middlewares/auth.js';
 import passport from 'passport';
 
 const router = Router();
@@ -30,7 +29,7 @@ router.post('/signup', async (req, res) => {
         signupForm.role =
             signupForm.email === 'admin@coder.com' ? 'admin' : 'user';
         // Save the user to the database
-        const result = await usersService.save(signupForm);
+        await usersService.save(signupForm);
         res.render('login', { message: 'Usuario registrado' });
     } catch (error) {
         res.status(500).render('signup', { error: error.message });
@@ -82,31 +81,30 @@ router.get('/profile', requireLogin, (req, res) => {
     res.render('profile', { first_name, email });
 });
 
-router.post('/logout', (req, res) => {
-    req.session.destroy((error) => {
-        if (error) {
-            return res.status(500).render('profile', {
-                error: 'Failed to destroy the session.',
-            });
-        }
-
-        res.clearCookie('connect.sid');
+router.post('/logout', (req, res, next) => {
+    // Use Passport's req.logout() to log the user out
+    req.logout(() => {
+        // Redirect to the login page
         res.redirect('/api/sessions/login');
     });
-
-    // Other existing code...
 });
 
 // GitHub authentication route
-router.get('/github', passport.authenticate('github'));
+router.get('/github', passport.authenticate('githubLoginStrategy'));
 
 // GitHub authentication callback route
 router.get(
     '/github-callback',
-    passport.authenticate('github', { failureRedirect: '/login' }),
+    passport.authenticate('githubLoginStrategy', { failureRedirect: '/login' }),
     (req, res) => {
-        // Successful authentication, redirect to your desired page.
-        res.redirect('/');
+        // Successful authentication, store GitHub user data in session
+        req.session.userInfo = {
+            first_name: req.user.first_name, // Replace with the appropriate field from the GitHub user object
+            email: req.user.email, // Replace with the appropriate field from the GitHub user object
+        };
+
+        // Redirect to '/api/products' after GitHub login
+        res.redirect('/api/products');
     }
 );
 
