@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { usersService } from '../dao/index.js';
 import bcrypt from 'bcrypt';
 import passport from 'passport';
+import { verifyToken } from '../middlewares/auth.js';
+import { secretKey } from '../config/jwtConfig.js';
 
 const router = Router();
 
@@ -36,6 +38,10 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+import jwt from 'jsonwebtoken';
+
+// ...
+
 router.post('/login', async (req, res) => {
     try {
         const loginForm = req.body;
@@ -46,19 +52,29 @@ router.post('/login', async (req, res) => {
                 .render('login', { error: 'Invalid email or password' });
         }
 
-        // Set the user role in the session from the user object
-        req.session.userInfo = {
-            ...req.session.userInfo,
-            role: user.role,
-            email: user.email,
-            first_name: user.first_name,
-        };
+        // Generate a JWT
+        const token = jwt.sign(
+            { first_name: user.first_name, email: user.email, role: user.role },
+            secretKey,
+            { expiresIn: '1h' }
+        );
+
+        // Set the JWT in a cookie
+        res.cookie('token', token, { httpOnly: true });
 
         res.redirect('/api/products');
     } catch (error) {
         console.error(error);
         res.status(500).send({ error: error.toString() });
     }
+});
+
+// ...
+
+router.get('/current', verifyToken, (req, res) => {
+    // The verified user is available as req.user
+    const { first_name, email } = req.user;
+    res.json({ first_name, email });
 });
 
 export const requireLogin = (req, res, next) => {
@@ -81,7 +97,7 @@ router.get('/profile', requireLogin, (req, res) => {
     res.render('profile', { first_name, email });
 });
 
-router.post('/logout', (req, res, next) => {
+router.post('/logout', (req, res) => {
     // Use Passport's req.logout() to log the user out
     req.logout(() => {
         // Redirect to the login page
@@ -107,5 +123,25 @@ router.get(
         res.redirect('/api/products');
     }
 );
+
+router.get('/profile', verifyToken, (req, res) => {
+    // The verified user is available as req.user
+    const { first_name, email } = req.user;
+
+    // Add a console log to print the first_name and email
+    console.log(
+        'first_name and email retrieved from token:',
+        first_name,
+        email
+    );
+    res.render('profile', { first_name, email });
+});
+
+// Add the /current route to get the current user based on the token
+router.get('/current', verifyToken, (req, res) => {
+    // The verified user is available as req.user
+    const { first_name, email } = req.user;
+    res.json({ first_name, email });
+});
 
 export { router as sessionsRouter };

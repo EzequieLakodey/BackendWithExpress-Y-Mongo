@@ -13,8 +13,10 @@ import { productsRouter } from './routes/products.routes.js';
 import { cartsRouter } from './routes/carts.routes.js';
 import passport from 'passport';
 import { initializePassport } from './config/passportConfig.js';
+import cookieParser from 'cookie-parser';
 /* MODULES */
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '/public')));
