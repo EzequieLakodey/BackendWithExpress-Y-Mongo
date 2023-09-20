@@ -3,6 +3,7 @@ import LocalStrategy from 'passport-local';
 import { usersService } from '../dao/index.js';
 import githubStrategy from 'passport-github2';
 import { config } from './config.js';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 
 export const initializePassport = () => {
     passport.use(
@@ -78,7 +79,9 @@ export const initializePassport = () => {
                     );
                     if (!user) {
                         const newUser = {
-                            email: profile.email,
+                            email: profile.emails
+                                ? profile.emails[0].value
+                                : profile.username,
                             first_name: profile.username,
                             password: process.env.DEFAULT_PWD || 'githubuser', //default password for github users
                         };
@@ -103,4 +106,54 @@ export const initializePassport = () => {
         const user = await usersService.getById(id);
         done(null, user); //req.user --->sesions req.sessions.user
     });
+
+    const options = {
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        secretOrKey: process.env.JWT_SECRET,
+    };
+
+    passport.use(
+        'jwt',
+        new JwtStrategy(options, (jwt_payload, done) => {
+            usersService
+                .getById(jwt_payload.id)
+                .then((user) => {
+                    if (user) {
+                        return done(null, user);
+                    } else {
+                        return done(null, false);
+                    }
+                })
+                .catch((err) => done(err, false));
+        })
+    );
+
+    const cookieExtractor = function (req) {
+        let token = null;
+        if (req && req.cookies) {
+            token = req.cookies['token'];
+        }
+        return token;
+    };
+
+    const opts = {
+        jwtFromRequest: cookieExtractor,
+        secretOrKey: process.env.JWT_SECRET,
+    };
+
+    passport.use(
+        'current',
+        new JwtStrategy(opts, function (jwt_payload, done) {
+            usersService
+                .getById(jwt_payload.id)
+                .then((user) => {
+                    if (user) {
+                        return done(null, user);
+                    } else {
+                        return done(null, false);
+                    }
+                })
+                .catch((err) => done(err, false));
+        })
+    );
 };

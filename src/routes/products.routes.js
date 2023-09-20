@@ -10,10 +10,9 @@ const fileManager = new ProductsManager('products.json');
 router.get('/', async (req, res) => {
     let first_name, email;
 
-    if (req.session && req.session.userInfo) {
-        ({ first_name, email } = req.session.userInfo);
+    if (req.user) {
+        ({ first_name, email } = req.user);
     }
-
     // Continue with your code. `first_name` and `email` will be undefined if the user is not registered.
     try {
         const page = parseInt(req.query.page) || 1;

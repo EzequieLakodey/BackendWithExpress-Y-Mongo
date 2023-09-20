@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import { secretKey } from '../config/jwtConfig.js';
 
 export const checkUserAuthenticated = (req, res, next) => {
     if (req.session?.userInfo) {
@@ -23,13 +22,13 @@ export function verifyToken(req, res, next) {
         return res.status(401).json({ error: 'Authentication required' });
     }
 
-    jwt.verify(token, secretKey, (err, decoded) => {
+    jwt.verify(token, (err, decoded) => {
         if (err) {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
-        // Set the user data in req.user
-        req.user = decoded;
+        // Set the user data in req.session.userInfo
+        req.session.userInfo = decoded;
         next();
     });
 }

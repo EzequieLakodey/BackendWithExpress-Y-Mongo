@@ -1,9 +1,7 @@
-import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 
-export const secretKey = crypto.randomBytes(32).toString('hex');
-console.log('Generated Secret Key:', secretKey);
-
-export const jwtConfig = {
-    secretKey: secretKey, // Replace with your secret key
-    expiresIn: '1h', // Token expiration duration (e.g., 1 hour)
+export const generateToken = (user) => {
+    return jwt.sign(user, process.env.JWT_SECRET, {
+        expiresIn: '24h', // expires in 24 hours
+    });
 };
