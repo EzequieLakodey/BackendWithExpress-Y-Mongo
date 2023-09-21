@@ -53,7 +53,12 @@ router.post('/login', async (req, res) => {
 
         // Generate a JWT
         const token = jwt.sign(
-            { first_name: user.first_name, email: user.email, role: user.role },
+            {
+                _id: user._id,
+                first_name: user.first_name,
+                email: user.email,
+                role: user.role,
+            },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -66,13 +71,7 @@ router.post('/login', async (req, res) => {
         console.error(error);
         res.status(500).send({ error: error.toString() });
     }
-}),
-    router.post('/logout', (req, res) => {
-        // Clear the JWT cookie
-        res.clearCookie('token');
-        // Redirect to login or another page
-        res.redirect('/api/sessions/login');
-    });
+});
 
 router.get('/current', verifyToken, (req, res) => {
     // The verified user is available as req.user
@@ -99,36 +98,39 @@ router.get('/profile', (req, res) => {
 });
 
 // GitHub authentication route
-router.get('/github', passport.authenticate('githubLoginStrategy'));
+router.get(
+    '/github',
+    passport.authenticate('githubLoginStrategy', { session: false })
+);
 
+// GitHub authentication callback route
 // GitHub authentication callback route
 router.get(
     '/github-callback',
-    passport.authenticate('githubLoginStrategy', { failureRedirect: '/login' }),
+    passport.authenticate('githubLoginStrategy', {
+        failureRedirect: '/login',
+        session: false,
+    }),
     (req, res) => {
-        // Successful authentication, store GitHub user data in session
-        req.session.userInfo = {
-            first_name: req.user.first_name, // Replace with the appropriate field from the GitHub user object
-            email: req.user.email, // Replace with the appropriate field from the GitHub user object
-        };
+        // Generate a JWT token for the user
+        const token = jwt.sign(
+            {
+                _id: req.user._id,
+                first_name: req.user.first_name,
+                email: req.user.email,
+                role: req.user.role,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        // Set the JWT token in a cookie
+        res.cookie('token', token, { httpOnly: true });
 
         // Redirect to '/api/products' after GitHub login
         res.redirect('/api/products');
     }
 );
-
-router.get('/profile', verifyToken, (req, res) => {
-    // The verified user is available as req.user
-    const { first_name, email } = req.user;
-
-    // Add a console log to print the first_name and email
-    console.log(
-        'first_name and email retrieved from token:',
-        first_name,
-        email
-    );
-    res.render('profile', { first_name, email });
-});
 
 // Add the /current route to get the current user based on the token
 router.get(
@@ -139,5 +141,13 @@ router.get(
         res.json({ first_name, email });
     }
 );
+
+router.post('/logout', (req, res) => {
+    // Clear the JWT cookie
+    res.clearCookie('token');
+
+    // Redirect to the login page
+    res.redirect('/api/sessions/login');
+});
 
 export { router as sessionsRouter };

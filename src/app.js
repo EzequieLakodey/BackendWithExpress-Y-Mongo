@@ -34,20 +34,8 @@ app.engine('.hbs', hbs.engine);
 app.set('view engine', '.hbs');
 app.set('views', path.join(__dirname, '/views'));
 
-app.use(
-    session({
-        store: MongoStore.create({
-            mongoUrl: `${config.mongo.url}/ecommerce`,
-        }),
-        secret: config.server.secretSession,
-        resave: true,
-        saveUninitialized: true,
-    })
-);
-
 initializePassport();
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.use(express.static(__dirname + '/public'));
 app.use(viewsRouter);

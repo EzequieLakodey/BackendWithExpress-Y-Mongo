@@ -22,13 +22,13 @@ export function verifyToken(req, res, next) {
         return res.status(401).json({ error: 'Authentication required' });
     }
 
-    jwt.verify(token, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
-        // Set the user data in req.session.userInfo
-        req.session.userInfo = decoded;
+        // Set the user data in req.user
+        req.user = decoded;
         next();
     });
 }

@@ -6,6 +6,13 @@ import { config } from './config.js';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 
 export const initializePassport = () => {
+    passport.serializeUser(function (user, done) {
+        done(null, user);
+    });
+
+    passport.deserializeUser(function (user, done) {
+        done(null, user);
+    });
     passport.use(
         'signupStrategy',
         new LocalStrategy(
@@ -97,16 +104,6 @@ export const initializePassport = () => {
         )
     );
 
-    //serializacion y deserializacion
-    passport.serializeUser((user, done) => {
-        done(null, user._id);
-    });
-
-    passport.deserializeUser(async (id, done) => {
-        const user = await usersService.getById(id);
-        done(null, user); //req.user --->sesions req.sessions.user
-    });
-
     const options = {
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         secretOrKey: process.env.JWT_SECRET,
@@ -115,16 +112,11 @@ export const initializePassport = () => {
     passport.use(
         'jwt',
         new JwtStrategy(options, (jwt_payload, done) => {
-            usersService
-                .getById(jwt_payload.id)
-                .then((user) => {
-                    if (user) {
-                        return done(null, user);
-                    } else {
-                        return done(null, false);
-                    }
-                })
-                .catch((err) => done(err, false));
+            if (jwt_payload) {
+                return done(null, jwt_payload);
+            } else {
+                return done(null, false);
+            }
         })
     );
 

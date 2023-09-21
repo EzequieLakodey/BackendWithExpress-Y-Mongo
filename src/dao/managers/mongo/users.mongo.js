@@ -20,7 +20,7 @@ export class UsersMongo {
             if (user) {
                 return user;
             } else {
-                throw new Error('Inexistent user');
+                throw new Error(`User with ID ${userId} not found`);
             }
         } catch (error) {
             throw error;

@@ -23,7 +23,6 @@ router.get('/', async (req, res) => {
         const prevPage = page - 1 > 0 ? page - 1 : null;
         const nextPage = page + 1 <= pages ? page + 1 : null;
         res.render('products', {
-            ...req.session.userInfo,
             products,
             prevPage,
             nextPage,
