@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { checkUserAuthenticated, showLoginView } from '../middlewares/auth.js';
 import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
 /* MODULES */
 

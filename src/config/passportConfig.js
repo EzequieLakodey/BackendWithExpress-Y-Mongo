@@ -86,9 +86,10 @@ export const initializePassport = () => {
                     );
                     if (!user) {
                         const newUser = {
-                            email: profile.emails
-                                ? profile.emails[0].value
-                                : profile.username,
+                            email:
+                                profile.emails && profile.emails.length > 0
+                                    ? profile.emails[0].value
+                                    : 'No public email',
                             first_name: profile.username,
                             password: process.env.DEFAULT_PWD || 'githubuser', //default password for github users
                         };

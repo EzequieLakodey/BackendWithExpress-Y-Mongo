@@ -79,20 +79,9 @@ router.get('/current', verifyToken, (req, res) => {
     res.json({ first_name, email });
 });
 
-router.get('/profile', (req, res) => {
-    // Verify the JWT
-    const token = req.cookies.token;
-    let userData;
-    try {
-        userData = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (error) {
-        console.error('Invalid token:', error);
-        return res.status(401).send('Invalid token');
-    }
-
-    // Extract the user data from the JWT
-    const { first_name, email } = userData;
-
+router.get('/profile', verifyToken, (req, res) => {
+    // The verified user is available as req.user
+    const { first_name, email } = req.user;
     // Render the view with the user data
     res.render('profile', { first_name, email });
 });

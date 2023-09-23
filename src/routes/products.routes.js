@@ -2,16 +2,19 @@ import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
 import ProductsManagerMongo from '../dao/managers/mongo/products.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
+import { verifyToken } from '../middlewares/auth.js';
 
 const router = Router();
 const mongoManager = new ProductsManagerMongo();
 const fileManager = new ProductsManager('products.json');
 
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
     let first_name, email;
 
     if (req.user) {
-        ({ first_name, email } = req.user);
+        // Don't use const here, as first_name and email are already declared
+        first_name = req.user.first_name;
+        email = req.user.email;
     }
     // Continue with your code. `first_name` and `email` will be undefined if the user is not registered.
     try {
@@ -26,7 +29,9 @@ router.get('/', async (req, res) => {
             products,
             prevPage,
             nextPage,
-        }); // pass user data to view
+            first_name,
+            email,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('There was an error getting the products');
