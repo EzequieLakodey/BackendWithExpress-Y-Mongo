@@ -3,6 +3,7 @@ import { usersService } from '../dao/index.js';
 import bcrypt from 'bcrypt';
 import passport from 'passport';
 import { verifyToken } from '../middlewares/auth.js';
+import { UserDTO } from '../dto/users.dto.js';
 
 const router = Router();
 
@@ -29,9 +30,17 @@ router.post('/signup', async (req, res) => {
         // Set the role based on the email
         signupForm.role =
             signupForm.email === 'admin@coder.com' ? 'admin' : 'user';
+
+        // Log the role
+        console.log(`Role after setting: ${signupForm.role}`);
+
         // Save the user to the database
-        await usersService.save(signupForm);
-        res.render('login', { message: 'Usuario registrado' });
+        const savedUser = await usersService.save(signupForm);
+
+        // Log the saved user's role
+        console.log(`Saved user's role: ${savedUser.role}`);
+
+        res.render('login', { message: 'User registered' });
     } catch (error) {
         res.status(500).render('signup', { error: error.message });
     }
@@ -45,12 +54,30 @@ router.post('/login', async (req, res) => {
     try {
         const loginForm = req.body;
         const user = await usersService.getByEmail(loginForm.email);
-        if (!user || !bcrypt.compareSync(loginForm.password, user.password)) {
+        if (!user) {
             return res
                 .status(401)
                 .render('login', { error: 'Invalid email or password' });
         }
 
+        console.log(
+            '🚀 ~ file: sessions.routes.js:55 ~ router.post ~ loginForm.password:',
+            loginForm.password
+        );
+
+        console.log(
+            '🚀 ~ file: sessions.routes.js:60 ~ router.post ~ user.password:',
+            user.password
+        );
+        if (
+            !loginForm.password ||
+            !user.password ||
+            !bcrypt.compareSync(loginForm.password, user.password)
+        ) {
+            return res
+                .status(401)
+                .render('login', { error: 'Invalid email or password' });
+        }
         // Generate a JWT
         const token = jwt.sign(
             {
@@ -61,6 +88,10 @@ router.post('/login', async (req, res) => {
             },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
+        );
+        console.log(
+            '🚀 ~ file: sessions.routes.js:84 ~ router.post ~ token:',
+            token
         );
 
         // Set the JWT in a cookie
@@ -75,8 +106,8 @@ router.post('/login', async (req, res) => {
 
 router.get('/current', verifyToken, (req, res) => {
     // The verified user is available as req.user
-    const { first_name, email } = req.user;
-    res.json({ first_name, email });
+    const userDto = new UserDTO(req.user);
+    res.json(userDto);
 });
 
 router.get('/profile', verifyToken, (req, res) => {
@@ -92,7 +123,6 @@ router.get(
     passport.authenticate('githubLoginStrategy', { session: false })
 );
 
-// GitHub authentication callback route
 // GitHub authentication callback route
 router.get(
     '/github-callback',
@@ -114,6 +144,8 @@ router.get(
         );
 
         // Set the JWT token in a cookie
+
+        console.log('🚀 ~ file: sessions.routes.js:141 ~ token:', token);
         res.cookie('token', token, { httpOnly: true });
 
         // Redirect to '/api/products' after GitHub login

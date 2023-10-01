@@ -1,6 +1,7 @@
 import CartsManagerMongo from '../dao/managers/mongo/carts.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
+import { verifyToken, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
 
@@ -68,18 +69,27 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.post('/:cid/products/:pid', async (req, res) => {
-    try {
-        const cid = req.params.cid;
-        const pid = req.params.pid;
-        const { quantity } = req.body;
-        const addedProduct = await manager.addProductToCart(cid, pid, quantity);
-        io.emit('add-product-to-cart', { cid, pid, quantity });
-        res.json(addedProduct);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+router.post(
+    '/:cid/products/:pid',
+    verifyToken,
+    requireRole('user'),
+    async (req, res) => {
+        try {
+            const cid = req.params.cid;
+            const pid = req.params.pid;
+            const { quantity } = req.body;
+            const addedProduct = await manager.addProductToCart(
+                cid,
+                pid,
+                quantity
+            );
+            io.emit('add-product-to-cart', { cid, pid, quantity });
+            res.json(addedProduct);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     }
-});
+);
 
 // PUT /api/carts/:cid/products/:pid
 router.put('/:cid/products/:pid', async (req, res) => {

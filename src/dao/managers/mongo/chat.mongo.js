@@ -1,8 +1,8 @@
-import Chat from '../../models/chat.model.js';
+import { chatModel } from '../../models/chat.model.js';
 
 class ChatManagerMongo {
     constructor() {
-        this.model = Chat;
+        this.model = chatModel;
     }
 
     async addMessage(user, message) {

@@ -2,7 +2,7 @@ import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
 import ProductsManagerMongo from '../dao/managers/mongo/products.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
-import { verifyToken } from '../middlewares/auth.js';
+import { verifyToken, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
 const mongoManager = new ProductsManagerMongo();
@@ -50,7 +50,7 @@ router.get('/:pid', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
     try {
         const product = req.body;
         const newProductFile = await fileManager.addProduct(product);
@@ -64,7 +64,7 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-router.put('/:pid', async (req, res) => {
+router.put('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
     try {
         const { pid } = req.params;
         const updatedProduct = await fileManager.updateProduct(pid, req.body);
@@ -77,7 +77,7 @@ router.put('/:pid', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-router.delete('/:pid', async (req, res) => {
+router.delete('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
     try {
         const { pid } = req.params;
         const deletedProductId = await fileManager.deleteProduct(pid);
