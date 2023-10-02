@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { verifyToken, requireRole } from '../middlewares/auth.js';
-import ChatManagerMongo from '../dao/managers/mongo/chat.mongo.js';
+import ChatManagerMongo from '../dao/controllers/mongo/chat.mongo.js';
 
 const router = Router();
 const chatManager = new ChatManagerMongo();

@@ -1,5 +1,5 @@
-import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
-import ProductsManagerMongo from '../dao/managers/mongo/products.mongo.js';
+import ProductsManager from '../dao/controllers/fs/productsManager.js';
+import ProductsManagerMongo from '../dao/controllers/mongo/products.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 import { verifyToken, requireRole } from '../middlewares/auth.js';

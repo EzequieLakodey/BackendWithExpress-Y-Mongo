@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import ProductsManager from '../dao/managers/fileSystem/productsManager.js';
+import ProductsManager from '../dao/controllers//fs/productsManager.js';
 /* MODULES */
 
 const manager = new ProductsManager('products.json');

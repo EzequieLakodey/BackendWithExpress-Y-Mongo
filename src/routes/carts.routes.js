@@ -1,4 +1,4 @@
-import CartsManagerMongo from '../dao/managers/mongo/carts.mongo.js';
+import CartsManagerMongo from '../dao/controllers/mongo/carts.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 import { verifyToken, requireRole } from '../middlewares/auth.js';
