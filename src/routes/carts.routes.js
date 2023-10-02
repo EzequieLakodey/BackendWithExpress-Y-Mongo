@@ -2,6 +2,8 @@ import CartsManagerMongo from '../dao/controllers/mongo/carts.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 import { verifyToken, requireRole } from '../middlewares/auth.js';
+import { UserDTO } from '../dto/users.dto.js';
+import { Ticket } from '../dao/models/tickets.model.js';
 
 const router = Router();
 
@@ -69,29 +71,77 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.post(
-    '/:cid/products/:pid',
-    verifyToken,
-    requireRole('user'),
-    async (req, res) => {
-        try {
-            const cid = req.params.cid;
-            const pid = req.params.pid;
-            const { quantity } = req.body;
-            const addedProduct = await manager.addProductToCart(
-                cid,
-                pid,
-                quantity
-            );
-            io.emit('add-product-to-cart', { cid, pid, quantity });
-            res.json(addedProduct);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
+router.post('/:cid/purchase', verifyToken, async (req, res) => {
+    try {
+        const cid = req.params.cid;
+        const cart = await manager.getCart(cid);
+        if (!cart) {
+            throw new Error('Cart not found');
         }
-    }
-);
 
-// PUT /api/carts/:cid/products/:pid
+        // Get the user data from the request
+        const user = req.user;
+        // Create a new UserDTO with the user data
+        const userDto = new UserDTO(user);
+
+        // Initialize an array to store products that could not be purchased
+        let unpurchasedProducts = [];
+
+        // Initialize total amount
+        let totalAmount = 0;
+
+        // Iterate over each product in the cart
+        for (let product of cart.products) {
+            // Validate if there is enough stock for each product
+            const productData = await this.productModel.findById(
+                product.productId
+            );
+            if (productData.stock < product.quantity) {
+                // If not enough stock, add product to unpurchasedProducts array
+                unpurchasedProducts.push(product.productId);
+            } else {
+                // Subtract the purchased quantity from the product's stock
+                productData.stock -= product.quantity;
+                await productData.save();
+
+                // Add the price of the purchased product to the total amount
+                totalAmount += productData.price * product.quantity;
+            }
+        }
+
+        // Create a new Ticket with the purchase data
+        const ticket = new Ticket({
+            code: Math.random().toString(36).substring(2, 15),
+            purchase_datetime: Date.now(),
+            amount: totalAmount,
+            purchaser: user.email,
+        });
+        await ticket.save();
+
+        // Remove purchased products from the cart
+        cart.products = cart.products.filter((product) =>
+            unpurchasedProducts.includes(product.productId)
+        );
+        await cart.save();
+
+        // Return the unpurchased products if any
+        if (unpurchasedProducts.length > 0) {
+            res.json({
+                message: 'Purchase completed with some products unavailable',
+                user: userDto,
+                unpurchasedProducts,
+            });
+        } else {
+            res.json({
+                message: 'Purchase completed successfully',
+                user: userDto,
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 router.put('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;

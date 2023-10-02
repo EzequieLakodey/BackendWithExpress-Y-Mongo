@@ -5,7 +5,7 @@ import ChatManagerMongo from '../dao/controllers/mongo/chat.mongo.js';
 const router = Router();
 const chatManager = new ChatManagerMongo();
 
-router.post('/message', verifyToken, requireRole('user'), async (req, res) => {
+router.post('/', verifyToken, requireRole('user'), async (req, res) => {
     try {
         const { user, message } = req.body;
         const newMessage = await chatManager.addMessage(user, message);
@@ -15,7 +15,7 @@ router.post('/message', verifyToken, requireRole('user'), async (req, res) => {
     }
 });
 
-router.get('/messages', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const messages = await chatManager.getMessages();
         res.json(messages);

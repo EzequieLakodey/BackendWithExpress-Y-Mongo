@@ -15,7 +15,7 @@ router.get('/realTimeProducts', async (req, res) => {
     res.render('realTimeProducts', { products });
 });
 
-router.get('/chat', (req, res) => {
+router.get('/api/chats', (req, res) => {
     res.render('chat');
 });
 
