@@ -3,6 +3,7 @@ import ProductsManagerMongo from '../dao/controllers/mongo/products.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 import { verifyToken, requireRole } from '../middlewares/auth.js';
+import { faker } from '@faker-js/faker';
 
 const router = Router();
 const mongoManager = new ProductsManagerMongo();
@@ -12,7 +13,6 @@ router.get('/', verifyToken, async (req, res) => {
     let first_name, email;
 
     if (req.user) {
-        // Don't use const here, as first_name and email are already declared
         first_name = req.user.first_name;
         email = req.user.email;
     }
@@ -20,7 +20,10 @@ router.get('/', verifyToken, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const size = parseInt(req.query.size) || 10;
-        const products = await mongoManager.getProducts({}, page, size);
+        const products = await mongoManager.getProducts({
+            page: page,
+            limit: size,
+        });
         const total = await mongoManager.getTotalProducts(); // use getTotalProducts instead of countProducts
         const pages = Math.ceil(total / size);
         const prevPage = page - 1 > 0 ? page - 1 : null;
@@ -37,6 +40,20 @@ router.get('/', verifyToken, async (req, res) => {
         res.status(500).send('There was an error getting the products');
     }
 });
+
+router.get('/mockingproducts', (req, res) => {
+    const products = Array.from({ length: 100 }, () => ({
+        title: faker.commerce.productName(),
+        description: faker.commerce.productDescription(),
+        code: faker.datatype.uuid(),
+        category: faker.commerce.department(),
+        price: faker.commerce.price(),
+        stock: faker.datatype.number(),
+    }));
+
+    res.json(products);
+});
+
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
@@ -50,6 +67,7 @@ router.get('/:pid', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
     try {
         const product = req.body;
@@ -64,6 +82,7 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 router.put('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
     try {
         const { pid } = req.params;
@@ -77,6 +96,7 @@ router.put('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 router.delete('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
     try {
         const { pid } = req.params;
@@ -93,4 +113,5 @@ router.delete('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 export { router as productsRouter };

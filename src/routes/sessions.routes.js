@@ -31,14 +31,8 @@ router.post('/signup', async (req, res) => {
         signupForm.role =
             signupForm.email === 'admin@coder.com' ? 'admin' : 'user';
 
-        // Log the role
-        console.log(`Role after setting: ${signupForm.role}`);
-
         // Save the user to the database
         const savedUser = await usersService.save(signupForm);
-
-        // Log the saved user's role
-        console.log(`Saved user's role: ${savedUser.role}`);
 
         res.render('login', { message: 'User registered' });
     } catch (error) {
@@ -60,15 +54,6 @@ router.post('/login', async (req, res) => {
                 .render('login', { error: 'Invalid email or password' });
         }
 
-        console.log(
-            '🚀 ~ file: sessions.routes.js:55 ~ router.post ~ loginForm.password:',
-            loginForm.password
-        );
-
-        console.log(
-            '🚀 ~ file: sessions.routes.js:60 ~ router.post ~ user.password:',
-            user.password
-        );
         if (
             !loginForm.password ||
             !user.password ||
@@ -88,10 +73,6 @@ router.post('/login', async (req, res) => {
             },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
-        );
-        console.log(
-            '🚀 ~ file: sessions.routes.js:84 ~ router.post ~ token:',
-            token
         );
 
         // Set the JWT in a cookie
@@ -145,7 +126,6 @@ router.get(
 
         // Set the JWT token in a cookie
 
-        console.log('🚀 ~ file: sessions.routes.js:141 ~ token:', token);
         res.cookie('token', token, { httpOnly: true });
 
         // Redirect to '/api/products' after GitHub login

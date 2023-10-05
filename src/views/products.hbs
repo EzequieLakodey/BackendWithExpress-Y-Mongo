@@ -1,11 +1,15 @@
 <header>
-    <h1>Welcome, {{first_name}}!</h1>
-    <p>Your registered email is: {{email}}</p>
+    {{#if first_name}}
+        <h1>Welcome, {{first_name}}!</h1>
+        <p>Your registered email is: {{email}}</p>
+    {{/if}}
 </header>
 
-<form action='/api/sessions/logout' method='POST'>
-    <button type='submit'>Logout</button>
-</form>
+{{#if first_name}}
+    <form action='/api/sessions/logout' method='POST'>
+        <button type='submit'>Logout</button>
+    </form>
+{{/if}}
 
 <main>
     <div>

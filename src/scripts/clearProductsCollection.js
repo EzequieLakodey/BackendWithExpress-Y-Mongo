@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
 import { connectDB } from '../config/dbConnection.js';
-import { productsModel } from '../dao/models/products.model.js'; // Make sure the path is correct
+import { productsModel } from '../dao/models/products.model.js';
 
-// Delete all products
 connectDB().then(() => {
     productsModel
         .deleteMany({})
