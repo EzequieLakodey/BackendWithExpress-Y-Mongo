@@ -4,23 +4,29 @@ import bcrypt from 'bcrypt';
 import passport from 'passport';
 import { verifyToken } from '../middlewares/auth.js';
 import { UserDTO } from '../dto/users.dto.js';
+import { logger } from '../middlewares/logger.js';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 
 router.get('/login', (req, res) => {
+    logger.info('GET /api/sessions/login - rendering login page');
     res.render('login');
 });
 
 router.get('/signup', (req, res) => {
+    logger.info('GET /api/sessions/signup - rendering signup page');
     res.render('signup');
 });
 
 router.post('/signup', async (req, res) => {
     try {
+        logger.info('POST /api/sessions/signup - user attempting to sign up');
         const signupForm = req.body;
         // Check if the user already exists
         const user = await usersService.getByEmail(signupForm.email);
         if (user) {
+            logger.warn('POST /api/sessions/signup - user already registered');
             return res.status(400).render('signup', {
                 error: 'El usuario ya está registrado',
             });
@@ -34,21 +40,21 @@ router.post('/signup', async (req, res) => {
         // Save the user to the database
         const savedUser = await usersService.save(signupForm);
 
+        logger.info('POST /api/sessions/signup - user registered successfully');
         res.render('login', { message: 'User registered' });
     } catch (error) {
+        logger.error(`POST /api/sessions/signup - ${error.message}`);
         res.status(500).render('signup', { error: error.message });
     }
 });
 
-import jwt from 'jsonwebtoken';
-
-// ...
-
 router.post('/login', async (req, res) => {
     try {
+        logger.info('POST /api/sessions/login - user attempting to log in');
         const loginForm = req.body;
         const user = await usersService.getByEmail(loginForm.email);
         if (!user) {
+            logger.warn('POST /api/sessions/login - invalid email or password');
             return res
                 .status(401)
                 .render('login', { error: 'Invalid email or password' });
@@ -59,6 +65,7 @@ router.post('/login', async (req, res) => {
             !user.password ||
             !bcrypt.compareSync(loginForm.password, user.password)
         ) {
+            logger.warn('POST /api/sessions/login - invalid email or password');
             return res
                 .status(401)
                 .render('login', { error: 'Invalid email or password' });
@@ -78,20 +85,23 @@ router.post('/login', async (req, res) => {
         // Set the JWT in a cookie
         res.cookie('token', token, { httpOnly: true });
 
+        logger.info('POST /api/sessions/login - user logged in successfully');
         res.redirect('/api/products');
     } catch (error) {
-        console.error(error);
+        logger.error(`POST /api/sessions/login - ${error.message}`);
         res.status(500).send({ error: error.toString() });
     }
 });
 
 router.get('/current', verifyToken, (req, res) => {
+    logger.info('GET /api/sessions/current - fetching current user');
     // The verified user is available as req.user
     const userDto = new UserDTO(req.user);
     res.json(userDto);
 });
 
 router.get('/profile', verifyToken, (req, res) => {
+    logger.info('GET /api/sessions/profile - rendering profile page');
     // The verified user is available as req.user
     const { first_name, email } = req.user;
     // Render the view with the user data
@@ -144,6 +154,7 @@ router.get(
 );
 
 router.post('/logout', (req, res) => {
+    logger.info('POST /api/sessions/logout - user logged out');
     // Clear the JWT cookie
     res.clearCookie('token');
 

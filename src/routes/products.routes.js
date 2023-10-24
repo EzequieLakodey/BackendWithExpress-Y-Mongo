@@ -4,6 +4,7 @@ import { Router } from 'express';
 import { io } from '../servers.js';
 import { verifyToken, requireRole } from '../middlewares/auth.js';
 import { faker } from '@faker-js/faker';
+import { logger } from '../middlewares/logger.js';
 
 const router = Router();
 const mongoManager = new ProductsManagerMongo();
@@ -18,6 +19,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
     // Continue with your code. `first_name` and `email` will be undefined if the user is not registered.
     try {
+        logger.info('GET /api/products - fetching all products');
         const page = parseInt(req.query.page) || 1;
         const size = parseInt(req.query.size) || 10;
         const products = await mongoManager.getProducts({
@@ -36,12 +38,13 @@ router.get('/', verifyToken, async (req, res) => {
             email,
         });
     } catch (error) {
-        console.error(error);
+        logger.error(`GET /api/products - ${error.message}`);
         res.status(500).send('There was an error getting the products');
     }
 });
 
 router.get('/mockingproducts', (req, res) => {
+    logger.info('GET /api/products/mockingproducts - generating mock products');
     const products = Array.from({ length: 100 }, () => ({
         title: faker.commerce.productName(),
         description: faker.commerce.productDescription(),
@@ -57,6 +60,7 @@ router.get('/mockingproducts', (req, res) => {
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
+        logger.info(`GET /api/products/:pid - fetching product ${pid}`);
         const product = await mongoManager.getProductsById(pid);
         if (product) {
             res.render('productsDetails', { product: product.toObject() });
@@ -64,12 +68,14 @@ router.get('/:pid', async (req, res) => {
             res.status(404).json({ error: 'Product not found' });
         }
     } catch (error) {
+        logger.error(`GET /api/products/:pid - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
 
 router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
     try {
+        logger.info('POST /api/products - posting product');
         const product = req.body;
         const newProductFile = await fileManager.addProduct(product);
         const newProductMongo = await mongoManager.addProduct(product);
@@ -79,6 +85,7 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
             mongoDBProduct: newProductMongo,
         });
     } catch (error) {
+        logger.error(`POST /api/products - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
@@ -86,6 +93,7 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
 router.put('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
     try {
         const { pid } = req.params;
+        logger.info(`PUT /api/products/:pid - updating product ${pid}`);
         const updatedProduct = await fileManager.updateProduct(pid, req.body);
         if (updatedProduct) {
             res.json(updatedProduct);
@@ -93,6 +101,7 @@ router.put('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
             res.status(404).json({ error: 'Product not found' });
         }
     } catch (error) {
+        logger.error(`PUT /api/products/:pid - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
@@ -100,6 +109,7 @@ router.put('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
 router.delete('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
     try {
         const { pid } = req.params;
+        logger.info(`DELETE /api/products/:pid - deleting product ${pid}`);
         const deletedProductId = await fileManager.deleteProduct(pid);
         if (deletedProductId) {
             io.emit('delete-product', deletedProductId);
@@ -110,6 +120,7 @@ router.delete('/:pid', verifyToken, requireRole('admin'), async (req, res) => {
             res.status(404).json({ error: 'Product not found' });
         }
     } catch (error) {
+        logger.error(`DELETE /api/products/:pid - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });

@@ -14,8 +14,8 @@ import passport from 'passport';
 import { initializePassport } from './config/passportConfig.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import { errorHandler } from './middlewares/errorsHandlers.js';
 import { loggerTestRoute } from './routes/loggerTest.js';
+import { logger } from './middlewares/logger.js';
 
 /* MODULES */
 
@@ -40,6 +40,10 @@ app.set('views', path.join(__dirname, '/views'));
 
 initializePassport();
 app.use(passport.initialize());
+app.use((err, req, res, next) => {
+    logger.error(err.message);
+    res.status(500).send('An error occurred');
+});
 
 app.use(express.static(__dirname + '/public'));
 app.use(viewsRouter);
@@ -48,4 +52,3 @@ app.use('/api/carts', cartsRouter);
 app.use('/api/chats', chatRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/loggerTest', loggerTestRoute);
-app.use(errorHandler);

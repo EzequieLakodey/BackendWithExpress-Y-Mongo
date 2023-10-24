@@ -1,16 +1,27 @@
-import winston from 'winston/lib/winston/config';
+import winston from 'winston';
 
 const levels = {
-    debug: 0,
-    http: 1,
-    info: 2,
-    warning: 3,
-    error: 4,
-    fatal: 5,
+    fatal: 0,
+    error: 1,
+    warning: 2,
+    info: 3,
+    http: 4,
+    debug: 5,
 };
 
+const colors = {
+    debug: 'blue',
+    http: 'green',
+    info: 'cyan',
+    warning: 'yellow',
+    error: 'red',
+    fatal: 'magenta',
+};
+
+winston.addColors(colors);
+
 const developmentFormat = winston.format.combine(
-    winston.format.colorize(),
+    winston.format.colorize({ all: true }),
     winston.format.simple()
 );
 

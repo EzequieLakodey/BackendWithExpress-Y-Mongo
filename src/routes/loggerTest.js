@@ -1,16 +1,16 @@
-import { logger } from '../middlewares/logger';
+import { logger } from '../middlewares/logger.js';
 import { Router } from 'express';
 
 const router = Router();
 
-router.get('/loggerTest', (req, res) => {
-    logger.debug('Debug message');
-    logger.http('HTTP message');
-    logger.info('Info message');
-    logger.warning('Warning message');
-    logger.error('Error message');
-    logger.fatal('Fatal message');
-    res.send('Logged all levels');
+router.get('/', (req, res) => {
+    logger.debug('This is a debug log');
+    logger.http('This is a http log');
+    logger.info('This is an info log');
+    logger.warning('This is a warning log');
+    logger.error('This is an error log');
+    logger.fatal('This is a fatal log');
+    res.send('Check your logs');
 });
 
 export { router as loggerTestRoute };

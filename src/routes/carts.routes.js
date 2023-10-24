@@ -4,12 +4,14 @@ import { io } from '../servers.js';
 import { verifyToken } from '../middlewares/auth.js';
 import { UserDTO } from '../dto/users.dto.js';
 import { Ticket } from '../dao/models/tickets.model.js';
+import { logger } from '../middlewares/logger.js';
 
 const router = Router();
 
 const manager = new CartsManagerMongo();
 router.get('/', async (req, res) => {
     try {
+        logger.info('GET /api/carts - fetching all carts');
         const { limit = 10, page = 1, sort, query } = req.query;
         const skip = (page - 1) * limit;
 
@@ -43,6 +45,7 @@ router.get('/', async (req, res) => {
             nextLink: hasNextPage ? `/carts?page=${nextPage}` : null,
         });
     } catch (error) {
+        logger.error(`GET /api/carts - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
@@ -50,13 +53,16 @@ router.get('/', async (req, res) => {
 router.get('/:cid', async (req, res) => {
     try {
         const cid = req.params.cid;
+        logger.info(`GET /api/carts/:cid - fetching cart ${cid}`);
         const cart = await manager.getCart(cid);
         if (cart) {
             res.render('cartsDetails', { cart: cart.toObject() });
         } else {
+            logger.info(`GET /api/carts/:cid - No cart found with id ${cid}`);
             res.status(404).json({ error: 'Cart not found' });
         }
     } catch (error) {
+        logger.error(`GET /api/carts/:cid - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
@@ -126,18 +132,25 @@ router.post('/:cid/purchase', verifyToken, async (req, res) => {
 
         // Return the unpurchased products if any
         if (unpurchasedProducts.length > 0) {
+            logger.info(
+                'POST /api/carts/:cid/purchase - Purchase completed with some products unavailable'
+            );
             res.json({
                 message: 'Purchase completed with some products unavailable',
                 user: userDto,
                 unpurchasedProducts,
             });
         } else {
+            logger.info(
+                'POST /api/carts/:cid/purchase - Purchase completed successfully'
+            );
             res.json({
                 message: 'Purchase completed successfully',
                 user: userDto,
             });
         }
     } catch (error) {
+        logger.error(`POST /api/carts/:cid/purchase - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
@@ -151,8 +164,12 @@ router.put('/:cid/products/:pid', async (req, res) => {
             pid,
             quantity
         );
+        logger.info(
+            `PUT /api/carts/:cid/products/:pid - Product ${pid} added to cart ${cid}`
+        );
         res.json(updatedProduct);
     } catch (error) {
+        logger.error(`PUT /api/carts/:cid/products/:pid - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
@@ -183,13 +200,16 @@ router.put('/:cid/products/:pid', async (req, res) => {
     }
 });
 
-// DELETE /api/carts/:cid/products/:pid
 router.delete('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         await manager.removeProductFromCart(cid, pid);
+        logger.info(
+            `DELETE /api/carts/:cid/products/:pid - Product ${pid} removed from cart ${cid}`
+        );
         res.json({ message: 'Product removed from cart' });
     } catch (error) {
+        logger.error(`DELETE /api/carts/:cid/products/:pid - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
