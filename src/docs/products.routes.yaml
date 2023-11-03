@@ -1,0 +1,120 @@
+paths:
+    /api/products:
+        get:
+            summary: Retrieve a list of products
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                  description: Page number for products pagination
+                - in: query
+                  name: size
+                  schema:
+                      type: integer
+                  description: Number of products to return per page
+            responses:
+                '200':
+                    description: A list of products
+                '500':
+                    description: Error message
+        post:
+            summary: Create a new product
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                title:
+                                    type: string
+                                description:
+                                    type: string
+                                code:
+                                    type: string
+                                category:
+                                    type: string
+                                price:
+                                    type: number
+                                stock:
+                                    type: integer
+            responses:
+                '200':
+                    description: The created product
+                '500':
+                    description: Error message
+
+    /api/products/mockingproducts:
+        get:
+            summary: Generate mock products
+            responses:
+                '200':
+                    description: A list of mock products
+
+    /api/products/{pid}:
+        get:
+            summary: Retrieve a specific product
+            parameters:
+                - in: path
+                  name: pid
+                  schema:
+                      type: string
+                  required: true
+                  description: Product ID
+            responses:
+                '200':
+                    description: The requested product
+                '404':
+                    description: Product not found
+                '500':
+                    description: Error message
+        put:
+            summary: Update a specific product
+            parameters:
+                - in: path
+                  name: pid
+                  schema:
+                      type: string
+                  required: true
+                  description: Product ID
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                title:
+                                    type: string
+                                description:
+                                    type: string
+                                code:
+                                    type: string
+                                category:
+                                    type: string
+                                price:
+                                    type: number
+                                stock:
+                                    type: integer
+            responses:
+                '200':
+                    description: The updated product
+                '404':
+                    description: Product not found
+                '500':
+                    description: Error message
+        delete:
+            summary: Delete a specific product
+            parameters:
+                - in: path
+                  name: pid
+                  schema:
+                      type: string
+                  required: true
+                  description: Product ID
+            responses:
+                '200':
+                    description: Message indicating the product was deleted
+                '404':
+                    description: Product not found
+                '500':
+                    description: Error message

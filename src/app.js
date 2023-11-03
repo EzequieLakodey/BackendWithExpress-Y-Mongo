@@ -16,7 +16,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { loggerTestRoute } from './routes/loggerTest.js';
 import { logger } from './middlewares/logger.js';
-
+import { swaggerSpecs } from './config/swagger.js';
+import swaggerUI from 'swagger-ui-express';
 /* MODULES */
 
 app.use(cookieParser());
@@ -52,3 +53,5 @@ app.use('/api/carts', cartsRouter);
 app.use('/api/chats', chatRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/loggerTest', loggerTestRoute);
+
+app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
