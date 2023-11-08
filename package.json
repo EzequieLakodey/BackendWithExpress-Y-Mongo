@@ -4,7 +4,7 @@
   "main": "backend/src/app.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --require @babel/register --exit 'src/test/**/*.test.js'",
     "start": "nodemon src/app.js"
   },
   "author": "",
@@ -34,7 +34,12 @@
   },
   "keywords": [],
   "devDependencies": {
-    "eslint": "^8.44.0"
+    "@babel/register": "^7.22.15",
+    "chai": "^4.3.10",
+    "chai-http": "^4.4.0",
+    "eslint": "^8.44.0",
+    "mocha": "^10.2.0",
+    "supertest": "^6.3.3"
   },
   "description": ""
 }

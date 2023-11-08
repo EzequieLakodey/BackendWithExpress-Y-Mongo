@@ -102,6 +102,9 @@ router.get('/current', verifyToken, (req, res) => {
 
 router.get('/profile', verifyToken, (req, res) => {
     logger.info('GET /api/sessions/profile - rendering profile page');
+    if (!req.user) {
+        return res.status(401).json({ error: 'Not authorized' });
+    }
     // The verified user is available as req.user
     const { first_name, email } = req.user;
     // Render the view with the user data

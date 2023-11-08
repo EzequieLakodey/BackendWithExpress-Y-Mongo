@@ -55,3 +55,5 @@ app.use('/api/sessions', sessionsRouter);
 app.use('/loggerTest', loggerTestRoute);
 
 app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
+
+export default app;
