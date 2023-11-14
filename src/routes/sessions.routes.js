@@ -20,18 +20,25 @@ router.get('/signup', (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
+    console.log(req.body);
     try {
         logger.info('POST /api/sessions/signup - user attempting to sign up');
+        console.log(req.body);
         const signupForm = req.body;
         // Check if the user already exists
         const user = await usersService.getByEmail(signupForm.email);
         if (user) {
-            logger.warn('POST /api/sessions/signup - user already registered');
+            logger.warning(
+                'POST /api/sessions/signup - user already registered'
+            );
             return res.status(400).render('signup', {
                 error: 'El usuario ya está registrado',
             });
         }
         // Hash the password
+        if (!signupForm.password) {
+            throw new Error('Password is required');
+        }
         signupForm.password = await bcrypt.hash(signupForm.password, 10);
         // Set the role based on the email
         signupForm.role =
@@ -39,9 +46,12 @@ router.post('/signup', async (req, res) => {
 
         // Save the user to the database
         const savedUser = await usersService.save(signupForm);
-
+        console.log(
+            '🚀 ~ file: sessions.routes.js:48 ~ router.post ~ savedUser:',
+            savedUser
+        );
         logger.info('POST /api/sessions/signup - user registered successfully');
-        res.render('login', { message: 'User registered' });
+        res.status(200).json({ message: 'User registered' });
     } catch (error) {
         logger.error(`POST /api/sessions/signup - ${error.message}`);
         res.status(500).render('signup', { error: error.message });
@@ -49,12 +59,15 @@ router.post('/signup', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
+    console.log(req.body);
     try {
         logger.info('POST /api/sessions/login - user attempting to log in');
         const loginForm = req.body;
         const user = await usersService.getByEmail(loginForm.email);
         if (!user) {
-            logger.warn('POST /api/sessions/login - invalid email or password');
+            logger.warning(
+                'POST /api/sessions/login - invalid email or password'
+            );
             return res
                 .status(401)
                 .render('login', { error: 'Invalid email or password' });
@@ -65,7 +78,9 @@ router.post('/login', async (req, res) => {
             !user.password ||
             !bcrypt.compareSync(loginForm.password, user.password)
         ) {
-            logger.warn('POST /api/sessions/login - invalid email or password');
+            logger.warning(
+                'POST /api/sessions/login - invalid email or password'
+            );
             return res
                 .status(401)
                 .render('login', { error: 'Invalid email or password' });
@@ -86,7 +101,7 @@ router.post('/login', async (req, res) => {
         res.cookie('token', token, { httpOnly: true });
 
         logger.info('POST /api/sessions/login - user logged in successfully');
-        res.redirect('/api/products');
+        res.status(200).json({ token: 'Your token here' });
     } catch (error) {
         logger.error(`POST /api/sessions/login - ${error.message}`);
         res.status(500).send({ error: error.toString() });
@@ -102,6 +117,7 @@ router.get('/current', verifyToken, (req, res) => {
 
 router.get('/profile', verifyToken, (req, res) => {
     logger.info('GET /api/sessions/profile - rendering profile page');
+    console.log(req.headers.authorization);
     if (!req.user) {
         return res.status(401).json({ error: 'Not authorized' });
     }
