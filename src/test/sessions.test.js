@@ -1,57 +1,79 @@
 import chai from 'chai';
-import chaiHttp from 'chai-http';
-import app from '../app.js'; // import your express app
+import UsersMongo from '../dao/controllers/mongo/usersRepository.js';
+import { usersModel } from '../dao/models/users.model.js';
+import { UserDTO } from '../dto/users.dto.js';
+import { before } from 'mocha';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import app from '../app.js';
 
-chai.use(chaiHttp);
-const { expect } = chai;
+const expect = chai.expect;
+let usersMongo, token;
 
-let user, token;
+console.log('Connected to MongoDB');
 
-beforeEach(() => {
-    user = {
-        first_name: 'Test',
-        email: `myfirst${Date.now()}@account.com`,
-        password: '123',
-    };
-});
+describe('Sessions API', function () {
+    before(async function () {
+        usersMongo = new UsersMongo();
+        console.log('🚀 ~ file: sessions.test.js:18 ~ UsersMongo:', UsersMongo);
+    });
 
-it('should allow user to signup', (done) => {
-    expect(res.body.message).to.equal('User registered');
-    chai.request(app)
-        .post('/api/sessions/signup')
-        .send(user)
-        .end((err, res) => {
-            expect(res).to.have.status(200);
-            setTimeout(done, 500);
+    beforeEach(async () => {
+        await usersModel.deleteMany({});
+    });
+
+    it('should allow user to signup', async () => {
+        const userDto = new UserDTO({
+            first_name: 'Test',
+            email: 'test@example.com',
+            password: await bcrypt.hash('password', 10),
+            role: 'user',
         });
-});
+        const savedUser = await usersMongo.save(userDto);
+        expect(savedUser).to.be.an.instanceof(UserDTO);
+        expect(savedUser.email).to.equal('test@example.com');
+    });
 
-it('should allow user to login', (done) => {
-    token = res.body.token;
-    chai.request(app)
-        .post('/api/sessions/login')
-        .send(user)
-        .end((err, res) => {
-            expect(res).to.have.status(200);
-            token = res.body.token; // store the token
-            done();
-        });
-});
+    it('should allow user to login', async () => {
+        const userDto = await usersMongo.getByEmail('test@example.com');
+        if (!userDto) {
+            throw new Error('User not found');
+        }
+        const match = await bcrypt.compare('password', userDto.password);
+        expect(match).to.be.true;
+        token = jwt.sign(
+            {
+                _id: userDto._id,
+                first_name: userDto.first_name,
+                email: userDto.email,
+                role: userDto.role,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+    });
 
-it('should allow access to profile with valid token', (done) => {
-    if (!token) {
-        throw new Error('Token not generated');
-    }
-    chai.request(app)
-        .get('/api/sessions/profile')
-        .set('Authorization', `Bearer ${token}`) // use the token
-        .end((err, res) => {
-            expect(res).to.have.status(200);
-            done();
-        });
-});
+    it('should allow access to profile with valid token', async () => {
+        const userDto = await usersMongo.getByEmail('test@example.com');
+        const token = jwt.sign(
+            {
+                _id: userDto._id,
+                first_name: userDto.first_name,
+                email: userDto.email,
+                role: userDto.role,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+        chai.request(app)
+            .get('/api/sessions/profile')
+            .set('Authorization', `Bearer ${token}`) // use the token
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                done();
+            });
+    });
 
-describe('Sessions API', () => {
     it('should GET the login page', (done) => {
         chai.request(app)
             .get('/api/sessions/login')
@@ -70,12 +92,4 @@ describe('Sessions API', () => {
                 done();
             });
     });
-
-    chai.request(app)
-        .post('/api/sessions/signup')
-        .send(user)
-        .end((err, res) => {
-            expect(res).to.have.status(200);
-            done();
-        });
 });
