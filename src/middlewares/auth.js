@@ -1,7 +1,13 @@
 import jwt from 'jsonwebtoken';
 
 export function verifyToken(req, res, next) {
-    const token = req.cookies.token; // Get the token from the cookies
+    let token = req.cookies.token; // Get the token from the cookies
+
+    // If no token in cookies, check the Authorization header
+    if (!token && req.headers.authorization) {
+        // Format of Authorization header: "Bearer TOKEN"
+        token = req.headers.authorization.split(' ')[1];
+    }
 
     if (!token) {
         return next(); // No token provided, continue without setting req.user
