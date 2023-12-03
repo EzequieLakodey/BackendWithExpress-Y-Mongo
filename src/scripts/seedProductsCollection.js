@@ -22,7 +22,7 @@ connectDB().then(() => {
     productsModel
         .insertMany(products)
         .then(() => {
-            console.log(`Successfully inserted ${numProducts} products.`);
+            `Successfully inserted ${numProducts} products.`;
             mongoose.disconnect();
         })
         .catch((error) => {

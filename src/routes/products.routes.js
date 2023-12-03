@@ -30,13 +30,17 @@ router.get('/', verifyToken, async (req, res) => {
         const pages = Math.ceil(total / size);
         const prevPage = page - 1 > 0 ? page - 1 : null;
         const nextPage = page + 1 <= pages ? page + 1 : null;
-        res.render('products', {
-            products,
-            prevPage,
-            nextPage,
-            first_name,
-            email,
-        });
+        if (process.env.NODE_ENV === 'test') {
+            return res.json(products);
+        } else {
+            res.render('products', {
+                products,
+                prevPage,
+                nextPage,
+                first_name,
+                email,
+            });
+        }
     } catch (error) {
         logger.error(`GET /api/products - ${error.message}`);
         res.status(500).send('There was an error getting the products');

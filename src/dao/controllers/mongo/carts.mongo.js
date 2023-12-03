@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { cartsModel } from '../../models/carts.model.js';
 import { productsModel } from '../../models/products.model.js';
+import { logger } from '../../../middlewares/logger.js';
 
 /* MODULES */
 
@@ -27,38 +28,53 @@ class CartsManagerMongo {
 
     async createCart() {
         try {
-            console.log('Creating new cart...');
+            logger.info('Creating new cart...');
             const newCart = await this.model.create({});
-            console.log('New cart created ', newCart);
+            logger.info(`New cart created with ID: ${newCart._id}`);
             return newCart;
         } catch (error) {
-            console.log('Error creating new cart: ', error);
+            logger.error(`Error creating new cart: ${error.message}`);
             throw error;
         }
     }
 
-    async updateCart(cartId, products) {
-        const cart = await this.getCart(cartId);
-        if (!cart) {
-            throw new Error('Cart not found');
-        }
-        cart.products = products;
-        await cart.save();
-        return cart;
+    async updateCart(cartId, newCartData) {
+        logger.info(
+            `Updating cart ${cartId} with new data ${JSON.stringify(
+                newCartData
+            )}`
+        );
+        let updatedCart = await this.model.findByIdAndUpdate(
+            cartId,
+            newCartData,
+            { new: true }
+        );
+        return updatedCart;
     }
 
     async updateProductQuantity(cartId, productId, quantity) {
-        const cart = await this.getCart(cartId);
-        if (!cart) {
-            throw new Error('Cart not found');
+        try {
+            const cart = await this.getCart(cartId);
+            if (!cart) {
+                throw new Error('Cart not found');
+            }
+            const product = cart.products.find((p) =>
+                p.product.equals(productId)
+            );
+
+            if (!product) {
+                throw new Error('Product not found in cart');
+            }
+            product.quantity = quantity;
+            logger.info(
+                `Updating product ${productId} quantity in cart ${cartId} to ${quantity}`
+            );
+            await cart.save();
+            return cart;
+        } catch (error) {
+            logger.error(`Error updating product quantity: ${error}`);
+            throw error;
         }
-        const product = cart.products.find((p) => p.productId === productId);
-        if (!product) {
-            throw new Error('Product not found in cart');
-        }
-        product.quantity = quantity;
-        await cart.save();
-        return cart;
     }
 
     async removeAllProducts(cartId) {
@@ -68,6 +84,7 @@ class CartsManagerMongo {
         }
         cart.products = [];
         await cart.save();
+        logger.info(`Removing all products from cart ${cartId}`);
         return cart;
     }
 
@@ -96,6 +113,9 @@ class CartsManagerMongo {
         } else {
             // If the product does not exist in the cart, add it
             this.validateProduct(cart, productId);
+            logger.info(
+                `Adding product ${productId} to cart ${cartId} with quantity ${quantity}`
+            );
 
             const product = {
                 product: productId,
@@ -109,19 +129,27 @@ class CartsManagerMongo {
     }
 
     async removeProductFromCart(cartId, id) {
-        const cart = await this.getCart(cartId);
-        if (!cart) {
-            throw new Error('Cart not found');
-        }
+        try {
+            const cart = await this.getCart(cartId);
+            if (!cart) {
+                throw new Error('Cart not found');
+            }
 
-        const productIndex = cart.products.findIndex((p) => p.id === id);
-        if (productIndex === -1) {
-            throw new Error('Product not found in the cart');
-        }
+            const productIndex = cart.products.findIndex((p) =>
+                p.product.equals(id)
+            );
+            if (productIndex === -1) {
+                throw new Error('Product not found in the cart');
+            }
 
-        cart.products.splice(productIndex, 1);
-        await cart.save();
-        return id;
+            cart.products.splice(productIndex, 1);
+            await cart.save();
+            logger.info(`Removing product ${id} from cart ${cartId}`);
+            return id;
+        } catch (error) {
+            logger.error(`Error removing product from cart: ${error}`);
+            throw error;
+        }
     }
     async update() {}
 }

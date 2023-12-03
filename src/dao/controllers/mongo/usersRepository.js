@@ -16,6 +16,12 @@ class UsersMongo {
         });
         return new UserDTO(user);
     }
+
+    async getAll() {
+        const users = await this.model.find();
+        return users;
+    }
+
     async getById(userId) {
         const user = await this.model.findById(userId);
         if (user) {
@@ -32,6 +38,20 @@ class UsersMongo {
         } else {
             return null;
         }
+    }
+
+    async deleteInactiveUsers(date) {
+        const users = await this.model.find({
+            last_login: { $lt: date },
+        });
+
+        const deletedUsers = [];
+        for (const user of users) {
+            deletedUsers.push(new UserDTO(user));
+            await this.model.deleteOne({ _id: user._id });
+        }
+
+        return deletedUsers;
     }
 }
 

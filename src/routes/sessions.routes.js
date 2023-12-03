@@ -20,10 +20,10 @@ router.get('/signup', (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
-    console.log(req.body);
+    req.body;
     try {
         logger.info('POST /api/sessions/signup - user attempting to sign up');
-        console.log(req.body);
+        req.body;
         const signupForm = req.body;
         // Check if the user already exists
         const user = await usersService.getByEmail(signupForm.email);
@@ -46,10 +46,8 @@ router.post('/signup', async (req, res) => {
 
         // Save the user to the database
         const savedUser = await usersService.save(signupForm);
-        console.log(
-            '🚀 ~ file: sessions.routes.js:48 ~ router.post ~ savedUser:',
-            savedUser
-        );
+        '🚀 ~ file: sessions.routes.js:48 ~ router.post ~ savedUser:',
+            savedUser;
         logger.info('POST /api/sessions/signup - user registered successfully');
         res.status(200).json({ message: 'User registered' });
     } catch (error) {
@@ -59,7 +57,7 @@ router.post('/signup', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-    console.log(req.body);
+    req.body;
     try {
         logger.info('POST /api/sessions/login - user attempting to log in');
         const loginForm = req.body;
@@ -85,6 +83,10 @@ router.post('/login', async (req, res) => {
                 .status(401)
                 .render('login', { error: 'Invalid email or password' });
         }
+
+        user.last_login = new Date();
+        await usersService.update(user);
+
         // Generate a JWT
         const token = jwt.sign(
             {
@@ -117,7 +119,7 @@ router.get('/current', verifyToken, (req, res) => {
 
 router.get('/profile', verifyToken, (req, res) => {
     logger.info('GET /api/sessions/profile - rendering profile page');
-    console.log(req.headers.authorization);
+    req.headers.authorization;
     if (!req.user) {
         return res.status(401).json({ error: 'Not authorized' });
     }
@@ -179,6 +181,31 @@ router.post('/logout', (req, res) => {
 
     // Redirect to the login page
     res.redirect('/api/sessions/login');
+});
+
+router.get('/users', async (req, res) => {
+    const users = await usersService.getAll();
+    const usersData = users.map((user) => ({
+        first_name: user.first_name,
+        email: user.email,
+        role: user.role,
+    }));
+    res.json(usersData);
+});
+
+router.delete('/users', async (req, res) => {
+    // Get the current time
+    const now = new Date();
+    // Get the time 2 days ago (or 30 minutes ago for testing)
+    const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+
+    // Delete all users who haven't logged in in the last 2 days (or 30 minutes)
+    const deletedUsers = await usersService.deleteInactiveUsers(twoDaysAgo);
+
+    // Send an email to each deleted user
+    // TODO: Implement this
+
+    res.json({ message: `Deleted ${deletedUsers.length} inactive users` });
 });
 
 export { router as sessionsRouter };

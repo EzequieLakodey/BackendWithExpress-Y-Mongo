@@ -19,6 +19,8 @@ import { logger } from './middlewares/logger.js';
 import { swaggerSpecs } from './config/swagger.js';
 import swaggerUI from 'swagger-ui-express';
 import { productsTestRouter } from './routes/products.test.routes.js';
+import { cartsTestRouter } from './routes/carts.test.routes.js';
+
 /* MODULES */
 
 app.use(cookieParser());
@@ -30,7 +32,7 @@ app.use(express.static(path.join(__dirname, '/public')));
 const port = config.server.port;
 
 httpServer.listen(port, () => {
-    console.log(`server running on port ${port}`);
+    `server running on port ${port}`;
 });
 
 connectDB();
@@ -53,9 +55,9 @@ app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
 app.use('/api/chats', chatRouter);
 app.use('/api/sessions', sessionsRouter);
-app.use('/api/test/products', productsTestRouter);
 app.use('/loggerTest', loggerTestRoute);
-
 app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
+app.use('/api/products-test', productsTestRouter);
+app.use('/api/carts-test', cartsTestRouter);
 
 export default app;

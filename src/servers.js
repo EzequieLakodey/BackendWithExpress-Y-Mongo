@@ -25,7 +25,7 @@ const io = new Server(httpServer, {
 connectDB();
 
 io.on('connection', (socket) => {
-    console.log('client connected');
+    ('client connected');
 
     socket.on('realtimeproducts', async (msg) => {
         const messages = await chatModel.find();
@@ -35,16 +35,16 @@ io.on('connection', (socket) => {
     });
 
     socket.on('message', async (data) => {
-        console.log('data', data);
+        'data', data;
         const newMessage = new chatModel({
             user: data.user,
             message: data.message,
         });
         try {
             const messageCreated = await newMessage.save();
-            console.log('messageCreated', messageCreated);
+            'messageCreated', messageCreated;
         } catch (error) {
-            console.log('Error while saving the message:', error);
+            'Error while saving the message:', error;
         }
         const messages = await chatModel.find();
         io.emit('messageHistory', messages);
@@ -61,11 +61,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('realtimeproducts', () => {
-        console.log('realtimeproducts event received');
+        ('realtimeproducts event received');
     });
 
     socket.on('disconnect', () => {
-        console.log('client disconnected');
+        ('client disconnected');
     });
 });
 

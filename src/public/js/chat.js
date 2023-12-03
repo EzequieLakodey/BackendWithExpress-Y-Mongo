@@ -2,7 +2,7 @@ const socket = io(); // Initialize socket.io
 
 // Configure socket.io connection
 socket.on('connect', () => {
-    console.log('Connected to server');
+    ('Connected to server');
 });
 
 // Adding Listener for Updating Chat

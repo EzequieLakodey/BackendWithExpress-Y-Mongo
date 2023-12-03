@@ -12,7 +12,7 @@ class ProductsManagerMongo {
         try {
             savedProduct = await newProduct.save();
         } catch (error) {
-            console.log('Error while savng the product:', error);
+            'Error while savng the product:', error;
             throw new Error('Error while saving the product');
         }
         return savedProduct;
@@ -41,15 +41,15 @@ class ProductsManagerMongo {
             { $limit: limit },
         ];
 
-        console.log(JSON.stringify(pipeline));
+        JSON.stringify(pipeline);
         const products = await this.model.aggregate(pipeline).exec();
         return products;
     }
 
     async getProductsById(id) {
-        console.log(id);
+        id;
         let product = await this.model.findById(id);
-        console.log(product);
+        product;
         return product;
     }
 

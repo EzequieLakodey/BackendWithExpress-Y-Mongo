@@ -7,7 +7,7 @@ document.querySelectorAll('.add-to-cart').forEach((button) => {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log('Product added:', data);
+                'Product added:', data;
             })
             .catch((error) => {
                 console.error('Error:', error);

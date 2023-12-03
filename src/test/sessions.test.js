@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import chai from 'chai';
 import UsersMongo from '../dao/controllers/mongo/usersRepository.js';
 import { usersModel } from '../dao/models/users.model.js';
@@ -63,11 +62,13 @@ describe('Sessions API', function () {
 
     it('should GET the login page', async () => {
         const res = await chai.request(app).get('/api/sessions/login');
+
         expect(res).to.have.status(200);
     });
 
     it('should not allow unauthorized access to profile', async () => {
         const res = await chai.request(app).get('/api/sessions/profile');
+
         expect(res).to.have.status(401);
     });
 

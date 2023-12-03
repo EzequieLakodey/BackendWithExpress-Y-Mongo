@@ -75,9 +75,9 @@ class ProductsManager extends EventEmitter {
 
         try {
             await fs.promises.writeFile(this.path, jsonString);
-            console.log('Data written');
+            ('Data written');
         } catch (error) {
-            console.log('Error writing file', error);
+            'Error writing file', error;
             throw new Error('Error writing file');
         }
     }
@@ -119,7 +119,7 @@ class ProductsManager extends EventEmitter {
         const numId = Number(id);
         const index = this.products.findIndex((p) => p.id === numId);
         if (index === -1) {
-            console.log('Inexistent product');
+            ('Inexistent product');
             return null;
         }
 
@@ -134,11 +134,11 @@ class ProductsManager extends EventEmitter {
         const lengthBeforeRemoval = this.products.length;
         this.products = this.products.filter((p) => p.id !== numId);
         if (this.products.length === lengthBeforeRemoval) {
-            console.log('Inexistent product');
+            ('Inexistent product');
             return null;
         }
         await this.writeToFile();
-        console.log('Product deleted succesfully');
+        ('Product deleted succesfully');
         this.emit('productDeleted', id);
         return id;
     }

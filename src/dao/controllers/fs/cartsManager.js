@@ -42,7 +42,7 @@ class CartsManager {
         const jsonString = JSON.stringify(this.carts, null, 2);
         try {
             await fs.promises.writeFile(this.path, jsonString);
-            console.log('Data written');
+            ('Data written');
         } catch (error) {
             console.error('Error writing file', error);
             throw new Error('Error writing file');

@@ -1,15 +1,26 @@
-import { verifyToken } from '../middlewares/auth.js';
 import { Router } from 'express';
 import { logger } from '../middlewares/logger.js';
-import ProductsManager from '../dao/controllers/fs/productsManager.js';
+
 import ProductsManagerMongo from '../dao/controllers/mongo/products.mongo.js';
 
 const router = Router();
 const mongoManager = new ProductsManagerMongo();
 
-router.get('/', verifyToken, async (req, res) => {
+router.post('/', async (req, res) => {
     try {
-        logger.info('GET /api/test/products - fetching all products');
+        logger.info('POST /api/products-test/ - posting product');
+        const product = req.body;
+        const newProduct = await mongoManager.addProduct(product);
+        res.json(newProduct);
+    } catch (error) {
+        logger.error(`POST /api/products-test/ - ${error.message}`);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/', async (req, res) => {
+    try {
+        logger.info('GET /api/products-test/ - fetching all products');
         const page = parseInt(req.query.page) || 1;
         const size = parseInt(req.query.size) || 10;
         const products = await mongoManager.getProducts({
@@ -18,7 +29,7 @@ router.get('/', verifyToken, async (req, res) => {
         });
         res.json(products);
     } catch (error) {
-        logger.error(`GET /api/test/products - ${error.message}`);
+        logger.error(`GET /api/products-test/ - ${error.message}`);
         res.status(500).send('There was an error getting the products');
     }
 });
@@ -26,7 +37,7 @@ router.get('/', verifyToken, async (req, res) => {
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
-        logger.info(`GET /api/test/products/:pid - fetching product ${pid}`);
+        logger.info(`GET /api/products-test/:pid - fetching product ${pid}`);
         const product = await mongoManager.getProductsById(pid);
         if (product) {
             res.json(product);
@@ -34,7 +45,41 @@ router.get('/:pid', async (req, res) => {
             res.status(404).json({ error: 'Product not found' });
         }
     } catch (error) {
-        logger.error(`GET /api/test/products/:pid - ${error.message}`);
+        logger.error(`GET /api/products-test/:pid - ${error.message}`);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.put('/:pid', async (req, res) => {
+    try {
+        const { pid } = req.params;
+        logger.info(`PUT /api/products-test/:pid - updating product ${pid}`);
+        const updatedProduct = await mongoManager.updateProduct(pid, req.body);
+        if (updatedProduct) {
+            res.json(updatedProduct);
+        } else {
+            res.status(404).json({ error: 'Product not found' });
+        }
+    } catch (error) {
+        logger.error(`PUT /api/products-test/:pid - ${error.message}`);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.delete('/:pid', async (req, res) => {
+    try {
+        const { pid } = req.params;
+        logger.info(`DELETE /api/products-test/:pid - deleting product ${pid}`);
+        const deletedProductId = await mongoManager.deleteProduct(pid);
+        if (deletedProductId) {
+            res.json({
+                message: `Product ${deletedProductId} deleted successfully`,
+            });
+        } else {
+            res.status(404).json({ error: 'Product not found' });
+        }
+    } catch (error) {
+        logger.error(`DELETE /api/products-test/:pid - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });

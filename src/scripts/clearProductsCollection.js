@@ -6,7 +6,7 @@ connectDB().then(() => {
     productsModel
         .deleteMany({})
         .then(() => {
-            console.log('Successfully deleted all products.');
+            ('Successfully deleted all products.');
             mongoose.disconnect();
         })
         .catch((error) => {

@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema({
         default: 'user',
         enum: ['user', 'admin'],
     },
+    last_login: {
+        type: Date,
+    },
 });
 
 export const usersModel = mongoose.model(usersCollection, userSchema);
