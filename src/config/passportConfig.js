@@ -79,16 +79,9 @@ export const initializePassport = () => {
             },
             async (accessToken, refreshToken, profile, done) => {
                 try {
-                    let email =
-                        profile.emails && profile.emails.length > 0
-                            ? profile.emails[0].value
-                            : 'No public email';
+                    let email = `${profile.username}@github.com`;
                     let user = await usersService.getByEmail(email);
                     if (!user) {
-                        // If a user with the email "No public email" already exists, generate a unique email
-                        if (email === 'No public email') {
-                            email = `${profile.username}@github.com`;
-                        }
                         const newUser = {
                             email: email,
                             first_name: profile.username,

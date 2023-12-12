@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { logger } from '../middlewares/logger.js';
+import { logger } from '../../middlewares/logger.js';
 
-import ProductsManagerMongo from '../dao/controllers/mongo/products.mongo.js';
+import ProductsManagerMongo from '../../dao/controllers/mongo/products.mongo.js';
 
 const router = Router();
 const mongoManager = new ProductsManagerMongo();

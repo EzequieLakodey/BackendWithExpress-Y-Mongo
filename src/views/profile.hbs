@@ -1,17 +1,22 @@
-<nav>
-    <ul>
-        <li>
-            <a href='/api/products'>Products</a>
-        </li>
-        <li>
-            <a href='/api/sessions/profile'>Profile</a>
-        </li>
-        <li>
-            <form action='/api/sessions/logout' method='POST'>
-                <button type='submit'>Logout</button>
-            </form>
-        </li>
-    </ul>
-</nav>
-<h1>Welcome, {{first_name}}!</h1>
-<p>Your registered email is: {{email}}</p>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div>
+        {{> navbar}}
+        <form action='/api/sessions/logout' method='POST'>
+            <button type='submit'>Logout</button>
+        </form>
+    </div>
+
+    <h1>Welcome, {{first_name}}!</h1>
+    <p>{{email}}</p>
+</body>
+
+</html>

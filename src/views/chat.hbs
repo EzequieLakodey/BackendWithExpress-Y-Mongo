@@ -1,16 +1,28 @@
-<div id='chat-messages'></div>
+<html lang='en'>
 
-<form id='chat-form'>
-    <input type='text' id='user-input' placeholder='Enter your name' required />
-    <input
-        type='text'
-        id='message-input'
-        placeholder='Enter your message'
-        required
-    />
-    <button type='submit'>Send</button>
-</form>
+<head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Document</title>
+</head>
 
-<script src='/socket.io/socket.io.js'></script>
+<body>
+    <div>
+        {{> navbar}}
+    </div>
 
-<script type='module' src='/js/chat.js'></script>
+    <div id='chat-messages'></div>
+
+    <form id='chat-form'>
+        <input type='text' id='user-input' placeholder='Enter your name' required />
+        <input type='text' id='message-input' placeholder='Enter your message' required />
+        <button type='submit'>Send</button>
+    </form>
+
+    <script src='/socket.io/socket.io.js'></script>
+
+    <script type='module' src='/js/chat.js'></script>
+
+</body>
+
+</html>

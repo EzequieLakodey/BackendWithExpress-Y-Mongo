@@ -1,10 +1,24 @@
-<h1>Cart Details</h1>
+<html lang='en'>
 
-<ul>
-    <li>
-        <p>CART ID : {{cart._id}}</p>
-    </li>
-    {{#each cart.products}}
+<head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Document</title>
+</head>
+
+
+<body>
+
+    <div>
+        {{> navbar}}
+    </div>
+    <h1>Cart Details</h1>
+
+    <ul>
+        <li>
+            <p>CART ID : {{cart._id}}</p>
+        </li>
+        {{#each cart.products}}
         <li>
             <h2>{{this.product.title}}</h2>
         </li>
@@ -14,5 +28,9 @@
         <li>
             <p>Price: ${{this.product.price}}</p>
         </li>
-    {{/each}}
-</ul>
+        {{/each}}
+    </ul>
+
+</body>
+
+</html>

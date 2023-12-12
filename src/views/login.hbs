@@ -1,25 +1,35 @@
-<html>
-    <head>
-        <title>Login</title>
-    </head>
-    <body>
-        <h1>Login</h1>
-        <form action='/api/sessions/login' method='post'>
-            <label for='email'>Email:</label><br />
-            <input type='email' id='email' name='email' required /><br />
-            <label for='password'>Password:</label><br />
-            <input type='password' id='password' name='password' required /><br
-            />
-            <input type='submit' value='Login' />
-        </form>
-        {{#if error}}
-            <p>{{error}}</p>
-        {{/if}}
-        {{#if message}}
-            <p>{{message}}</p>
-        {{/if}}
-        <a href='/api/sessions/signup'>Sign Up</a>
-        <br />
-        <a href='/api/sessions/github'>Log in with github</a>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login</title>
+</head>
+
+<body>
+    <div>
+        {{> navbar}}
+    </div>
+
+    <h1>Login</h1>
+    <form action='/api/sessions/login' method='post'>
+        <label for='email'>Email:</label><br />
+        <input type='email' id='email' name='email' required /><br />
+        <label for='password'>Password:</label><br />
+        <input type='password' id='password' name='password' required /><br />
+        <input type='submit' value='Login' />
+    </form>
+    {{#if error}}
+    <p>{{error}}</p>
+    {{/if}}
+    {{#if message}}
+    <p>{{message}}</p>
+    {{/if}}
+    <a href='/api/sessions/signup'>Sign Up</a>
+    <br />
+    <a href='/api/sessions/github'>Log in with github</a>
+</body>
+
 </html>

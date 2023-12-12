@@ -4,6 +4,6 @@ export class UserDTO {
         this.email = user.email;
         this.password = user.password;
         this.role = user.role;
-        // include other necessary fields...
+        this.last_login = user.last_login;
     }
 }

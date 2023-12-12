@@ -18,8 +18,9 @@ import { loggerTestRoute } from './routes/loggerTest.js';
 import { logger } from './middlewares/logger.js';
 import { swaggerSpecs } from './config/swagger.js';
 import swaggerUI from 'swagger-ui-express';
-import { productsTestRouter } from './routes/products.test.routes.js';
-import { cartsTestRouter } from './routes/carts.test.routes.js';
+import { productsTestRouter } from './test/routes/products.test.routes.js';
+import { cartsTestRouter } from './test/routes/carts.test.routes.js';
+import fs from 'fs';
 
 /* MODULES */
 
@@ -38,6 +39,13 @@ httpServer.listen(port, () => {
 connectDB();
 
 const hbs = handlebars.create({ defaultLayout: null, extname: '.hbs' });
+hbs.handlebars.registerPartial(
+    'navbar',
+    fs.readFileSync(
+        path.join(__dirname, 'views', 'partials', 'navbar.hbs'),
+        'utf8'
+    )
+);
 app.engine('.hbs', hbs.engine);
 app.set('view engine', '.hbs');
 app.set('views', path.join(__dirname, '/views'));

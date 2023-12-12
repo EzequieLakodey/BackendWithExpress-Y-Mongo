@@ -1,133 +1,28 @@
 import { Router } from 'express';
-import { usersService } from '../dao/index.js';
-import bcrypt from 'bcrypt';
 import passport from 'passport';
-import { verifyToken } from '../middlewares/auth.js';
-import { UserDTO } from '../dto/users.dto.js';
-import { logger } from '../middlewares/logger.js';
+import { redirectIfAuthenticated, verifyToken } from '../middlewares/auth.js';
 import jwt from 'jsonwebtoken';
+import sessionsMongo from '../dao/controllers/mongo/sessions.mongo.js';
 
 const router = Router();
 
-router.get('/login', (req, res) => {
-    logger.info('GET /api/sessions/login - rendering login page');
-    res.render('login');
-});
+router.get('/login', redirectIfAuthenticated, sessionsMongo.renderLoginPage);
 
-router.get('/signup', (req, res) => {
-    logger.info('GET /api/sessions/signup - rendering signup page');
-    res.render('signup');
-});
+router.get('/signup', redirectIfAuthenticated, sessionsMongo.renderSignupPage);
 
-router.post('/signup', async (req, res) => {
-    req.body;
-    try {
-        logger.info('POST /api/sessions/signup - user attempting to sign up');
-        req.body;
-        const signupForm = req.body;
-        // Check if the user already exists
-        const user = await usersService.getByEmail(signupForm.email);
-        if (user) {
-            logger.warning(
-                'POST /api/sessions/signup - user already registered'
-            );
-            return res.status(400).render('signup', {
-                error: 'El usuario ya está registrado',
-            });
-        }
-        // Hash the password
-        if (!signupForm.password) {
-            throw new Error('Password is required');
-        }
-        signupForm.password = await bcrypt.hash(signupForm.password, 10);
-        // Set the role based on the email
-        signupForm.role =
-            signupForm.email === 'admin@coder.com' ? 'admin' : 'user';
+router.get('/profile', verifyToken, sessionsMongo.renderProfilePage);
 
-        // Save the user to the database
-        const savedUser = await usersService.save(signupForm);
-        '🚀 ~ file: sessions.routes.js:48 ~ router.post ~ savedUser:',
-            savedUser;
-        logger.info('POST /api/sessions/signup - user registered successfully');
-        res.status(200).json({ message: 'User registered' });
-    } catch (error) {
-        logger.error(`POST /api/sessions/signup - ${error.message}`);
-        res.status(500).render('signup', { error: error.message });
-    }
-});
+router.get('/current', verifyToken, sessionsMongo.current);
 
-router.post('/login', async (req, res) => {
-    req.body;
-    try {
-        logger.info('POST /api/sessions/login - user attempting to log in');
-        const loginForm = req.body;
-        const user = await usersService.getByEmail(loginForm.email);
-        if (!user) {
-            logger.warning(
-                'POST /api/sessions/login - invalid email or password'
-            );
-            return res
-                .status(401)
-                .render('login', { error: 'Invalid email or password' });
-        }
+router.get('/users', sessionsMongo.getUsers);
 
-        if (
-            !loginForm.password ||
-            !user.password ||
-            !bcrypt.compareSync(loginForm.password, user.password)
-        ) {
-            logger.warning(
-                'POST /api/sessions/login - invalid email or password'
-            );
-            return res
-                .status(401)
-                .render('login', { error: 'Invalid email or password' });
-        }
+router.post('/signup', sessionsMongo.register);
 
-        user.last_login = new Date();
-        await usersService.update(user);
+router.post('/login', sessionsMongo.login);
 
-        // Generate a JWT
-        const token = jwt.sign(
-            {
-                _id: user._id,
-                first_name: user.first_name,
-                email: user.email,
-                role: user.role,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
+router.post('/logout', sessionsMongo.logout);
 
-        // Set the JWT in a cookie
-        res.cookie('token', token, { httpOnly: true });
-
-        logger.info('POST /api/sessions/login - user logged in successfully');
-        res.status(200).json({ token: 'Your token here' });
-    } catch (error) {
-        logger.error(`POST /api/sessions/login - ${error.message}`);
-        res.status(500).send({ error: error.toString() });
-    }
-});
-
-router.get('/current', verifyToken, (req, res) => {
-    logger.info('GET /api/sessions/current - fetching current user');
-    // The verified user is available as req.user
-    const userDto = new UserDTO(req.user);
-    res.json(userDto);
-});
-
-router.get('/profile', verifyToken, (req, res) => {
-    logger.info('GET /api/sessions/profile - rendering profile page');
-    req.headers.authorization;
-    if (!req.user) {
-        return res.status(401).json({ error: 'Not authorized' });
-    }
-    // The verified user is available as req.user
-    const { first_name, email } = req.user;
-    // Render the view with the user data
-    res.render('profile', { first_name, email });
-});
+router.post('/users', sessionsMongo.deleteUsers);
 
 // GitHub authentication route
 router.get(
@@ -163,49 +58,5 @@ router.get(
         res.redirect('/api/products');
     }
 );
-
-// Add the /current route to get the current user based on the token
-router.get(
-    '/current',
-    passport.authenticate('current', { session: false }),
-    (req, res) => {
-        const { first_name, email } = req.user;
-        res.json({ first_name, email });
-    }
-);
-
-router.post('/logout', (req, res) => {
-    logger.info('POST /api/sessions/logout - user logged out');
-    // Clear the JWT cookie
-    res.clearCookie('token');
-
-    // Redirect to the login page
-    res.redirect('/api/sessions/login');
-});
-
-router.get('/users', async (req, res) => {
-    const users = await usersService.getAll();
-    const usersData = users.map((user) => ({
-        first_name: user.first_name,
-        email: user.email,
-        role: user.role,
-    }));
-    res.json(usersData);
-});
-
-router.delete('/users', async (req, res) => {
-    // Get the current time
-    const now = new Date();
-    // Get the time 2 days ago (or 30 minutes ago for testing)
-    const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-
-    // Delete all users who haven't logged in in the last 2 days (or 30 minutes)
-    const deletedUsers = await usersService.deleteInactiveUsers(twoDaysAgo);
-
-    // Send an email to each deleted user
-    // TODO: Implement this
-
-    res.json({ message: `Deleted ${deletedUsers.length} inactive users` });
-});
 
 export { router as sessionsRouter };

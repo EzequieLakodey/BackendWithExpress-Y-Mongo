@@ -1,36 +1,51 @@
-<header>
-    {{#if first_name}}
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div>
+        {{> navbar}}
+    </div>
+    <header>
+
+        {{#if first_name}}
         <h1>Welcome, {{first_name}}!</h1>
         <p>Your registered email is: {{email}}</p>
-    {{/if}}
-</header>
+        {{/if}}
+    </header>
 
-{{#if first_name}}
+    {{#if first_name}}
     <form action='/api/sessions/logout' method='POST'>
         <button type='submit'>Logout</button>
     </form>
-{{/if}}
+    {{/if}}
 
-<main>
-    <div>
-        {{#if prevPage}}
+    <main>
+        <div>
+            {{#if prevPage}}
             <a href='/api/products?page={{prevPage}}'>Previous page</a>
-        {{/if}}
-    </div>
-    <div>
-        {{#if nextPage}}
+            {{/if}}
+        </div>
+        <div>
+
+            {{#if nextPage}}
             <a href='/api/products?page={{nextPage}}'>Next page</a>
-        {{/if}}
-    </div>
-    <h1>Products</h1>
-    {{#each products}}
+            {{/if}}
+        </div>
+
+        <h1>Products</h1>
+
+        {{#each products}}
         <div>
             <ul>
                 <li>
                     <div>
-                        <h2><a
-                                href='/api/products/{{this._id}}'
-                            >{{this.title}}</a></h2>
+                        <h2><a href='/api/products/{{this._id}}'>{{this.title}}</a></h2>
                     </div>
                 </li>
                 <li>
@@ -50,10 +65,12 @@
                 </li>
             </ul>
         </div>
-    {{/each}}
-</main>
-<script>
-    ('first_name and email in view:', '{{first_name}}', '{{email}}');
-</script>
+        {{/each}}
+    </main>
+</body>
+
+</html>
+
 <script src='/socket.io/socket.io.js'></script>
+
 <script type='module' src='/js/index.js'></script>

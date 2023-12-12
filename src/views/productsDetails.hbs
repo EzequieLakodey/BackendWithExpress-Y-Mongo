@@ -1,33 +1,49 @@
-<article>
-    <div>
-        <h1>title: {{product.title}}</h1>
-    </div>
-    <div>
-        <img src='{{product.thumbnail}}' alt='product thumbnail' />
-    </div>
-    <div>
-        <p>price: ${{product.price}}</p>
-    </div>
-    <div>
-        <p>description: {{product.description}}</p>
-    </div>
-    <div>
-        <p>category: {{product.category}}</p>
-    </div>
-    <div>
-        <p>stock: {{product.stock}}</p>
-    </div>
-    <div>
-        <p>code: {{product.code}}</p>
-    </div>
-    <div>
+<!DOCTYPE html>
+<html lang="en">
 
-        <button
-            class='add-to-cart'
-            data-product-id='{{product._id}}'
-            data-cart-id='{{cart._id}}'
-        >Add to Cart</button>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div>
+        {{> navbar}}
     </div>
-</article>
+
+    <article>
+        <div>
+            <h1>title: {{product.title}}</h1>
+        </div>
+        <div>
+            <img src='{{product.thumbnail}}' alt='product thumbnail' />
+        </div>
+        <div>
+            <p>price: ${{product.price}}</p>
+        </div>
+        <div>
+            <p>description: {{product.description}}</p>
+        </div>
+        <div>
+            <p>category: {{product.category}}</p>
+        </div>
+        <div>
+            <p>stock: {{product.stock}}</p>
+        </div>
+        <div>
+            <p>code: {{product.code}}</p>
+        </div>
+        <div>
+
+            <button class='add-to-cart' data-product-id='{{product._id}}' data-cart-id='{{cart._id}}'>Add to
+                Cart</button>
+        </div>
+    </article>
+</body>
+
+</html>
+
 
 <script src='/js/addProductsToCarts.js'></script>

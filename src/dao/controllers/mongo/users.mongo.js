@@ -11,8 +11,8 @@ class UsersMongo {
             first_name: userDto.first_name,
             email: userDto.email,
             password: userDto.password,
-            role: userDto.role, // Add this line
-            // include other necessary fields...
+            role: userDto.role,
+            last_login: Date.now(),
         });
         return new UserDTO(user);
     }
@@ -34,7 +34,7 @@ class UsersMongo {
     async getByEmail(userEmail) {
         const user = await this.model.findOne({ email: userEmail });
         if (user) {
-            return new UserDTO(user);
+            return user.toObject();
         } else {
             return null;
         }
@@ -44,14 +44,18 @@ class UsersMongo {
         const users = await this.model.find({
             last_login: { $lt: date },
         });
-
         const deletedUsers = [];
         for (const user of users) {
             deletedUsers.push(new UserDTO(user));
             await this.model.deleteOne({ _id: user._id });
         }
-
         return deletedUsers;
+    }
+    async update(userDto) {
+        const user = await this.model.findByIdAndUpdate(userDto._id, userDto, {
+            new: true,
+        });
+        return new UserDTO(user);
     }
 }
 
