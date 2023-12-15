@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div>
+    {{> navbar}}
+  </div>
+
+  <h1>Manage Users</h1>
+
+  <ul>
+    {{#each users}}
+    <li>
+      <p>Name: {{this.first_name}}</p>
+      <p>Email: {{this.email}}</p>
+      <p>Role: {{this.role}}</p>
+      <button class="delete-user" data-id="{{this._id}}">Delete User</button>
+      <select class="role-select" data-id="{{this._id}}">
+        <option value="user" {{#if (eq this.role 'user' )}}selected{{/if}}>User</option>
+        <option value="admin" {{#if (eq this.role 'admin' )}}selected{{/if}}>Admin</option>
+      </select>
+    </li>
+    {{/each}}
+  </ul>
+
+  <script src="/js/admin/users.js"></script>
+
+
+</body>
+
+</html>

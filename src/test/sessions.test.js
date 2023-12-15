@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import chai from 'chai';
 import UsersMongo from '../dao/controllers/mongo/users.mongo.js';
 import { usersModel } from '../dao/models/users.model.js';
@@ -6,10 +7,15 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import app from '../app.js';
 import { authState } from '../middlewares/auth.js';
+import sessionsMongo from '../dao/controllers/mongo/sessions.mongo.js';
+
+// Insalled sinon libraries to mock the time and don't depend on real time for the testing
+import Sinon from 'sinon';
 
 const { expect } = chai;
 let usersMongo, token, savedUser, testEmail;
 
+// eslint-disable-next-line no-undef
 describe('Sessions API', function () {
     before(async function () {
         usersMongo = new UsersMongo();
@@ -20,6 +26,7 @@ describe('Sessions API', function () {
             email: testEmail,
             password: await bcrypt.hash('password', 10),
             role: 'user',
+            last_login: new Date(Date.now() - 2 * 60 * 1000),
         });
         savedUser = await usersMongo.save(userDto);
     });
@@ -66,9 +73,7 @@ describe('Sessions API', function () {
     it('should GET the login page', async () => {
         // Reset the authState.checkedUser
         authState.checkedUser = null;
-
         const res = await chai.request(app).get('/api/sessions/login');
-
         expect(res).to.have.status(200);
     });
 
@@ -79,12 +84,23 @@ describe('Sessions API', function () {
     });
 
     it('should delete inactive users', async () => {
-        const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+        // Mock the current time
+        const now = new Date();
+        const clock = Sinon.useFakeTimers(now.getTime());
+
+        // Make the user created to be inactive
+        const oneMinuteAgo = new Date(now.getTime() - 60 * 1000);
         const deletedUsers = await usersMongo.deleteInactiveUsers(oneMinuteAgo);
         expect(deletedUsers).to.be.an('array');
         deletedUsers.forEach((user) => {
             expect(user.last_login).to.be.below(oneMinuteAgo);
         });
+
+        // Call the deleteUsers function
+        await sessionsMongo.deleteUsers(null, null, 60 * 1000);
+
+        // Restore the original time
+        clock.restore();
     });
 
     after(async function () {

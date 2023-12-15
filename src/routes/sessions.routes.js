@@ -7,22 +7,14 @@ import sessionsMongo from '../dao/controllers/mongo/sessions.mongo.js';
 const router = Router();
 
 router.get('/login', redirectIfAuthenticated, sessionsMongo.renderLoginPage);
-
 router.get('/signup', redirectIfAuthenticated, sessionsMongo.renderSignupPage);
-
 router.get('/profile', verifyToken, sessionsMongo.renderProfilePage);
-
 router.get('/current', verifyToken, sessionsMongo.current);
-
 router.get('/users', sessionsMongo.getUsers);
-
 router.post('/signup', sessionsMongo.register);
-
 router.post('/login', sessionsMongo.login);
-
 router.post('/logout', sessionsMongo.logout);
-
-router.post('/users', sessionsMongo.deleteUsers);
+router.delete('/users', sessionsMongo.deleteUsers);
 
 // GitHub authentication route
 router.get(

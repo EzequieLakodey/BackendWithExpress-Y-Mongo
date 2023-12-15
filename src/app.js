@@ -21,6 +21,7 @@ import swaggerUI from 'swagger-ui-express';
 import { productsTestRouter } from './test/routes/products.test.routes.js';
 import { cartsTestRouter } from './test/routes/carts.test.routes.js';
 import fs from 'fs';
+import { usersRouter } from './routes/users.routes.js';
 
 /* MODULES */
 
@@ -46,6 +47,11 @@ hbs.handlebars.registerPartial(
         'utf8'
     )
 );
+
+hbs.handlebars.registerHelper('eq', function (a, b) {
+    return a === b;
+});
+
 app.engine('.hbs', hbs.engine);
 app.set('view engine', '.hbs');
 app.set('views', path.join(__dirname, '/views'));
@@ -64,8 +70,10 @@ app.use('/api/carts', cartsRouter);
 app.use('/api/chats', chatRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/loggerTest', loggerTestRoute);
-app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
 app.use('/api/products-test', productsTestRouter);
+app.use('/api/admin/users', usersRouter);
 app.use('/api/carts-test', cartsTestRouter);
+
+app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));
 
 export default app;

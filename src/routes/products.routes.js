@@ -10,7 +10,7 @@ const router = Router();
 const mongoManager = new ProductsManagerMongo();
 const fileManager = new ProductsManager('products.json');
 
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', async (req, res) => {
     let first_name, email;
 
     if (req.user) {

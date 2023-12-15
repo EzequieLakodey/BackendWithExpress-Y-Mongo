@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { usersService } from '../../index.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -5,14 +6,11 @@ import { UserDTO } from '../../../dto/users.dto.js';
 import { authState } from '../../../middlewares/auth.js';
 import { logger } from '../../../middlewares/logger.js';
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+import EmailService from '../../../services/email.services.js';
+dotenv.config();
 
-let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'forcesOfTheSky@gmail.com',
-        pass: 'wG8Za7VSTVuhb#=',
-    },
-});
+const emailService = new EmailService();
 
 const renderLoginPage = (req, res) => {
     logger.info('GET /api/sessions/login - rendering login page');
@@ -57,7 +55,7 @@ const register = async (req, res) => {
             );
 
             return res.status(400).render('signup', {
-                error: 'El usuario ya está registrado',
+                error: 'User already exists',
             });
         }
         // Hash the password
@@ -125,8 +123,10 @@ const login = async (req, res) => {
                 .status(401)
                 .render('login', { error: 'Invalid email or password' });
         }
-        user.last_login = new Date();
-        await usersService.update(user);
+        if (process.env.NODE_ENV !== 'test') {
+            user.last_login = new Date();
+            await usersService.update(user);
+        }
         // Generate a JWT
         const token = jwt.sign(
             {
@@ -167,31 +167,46 @@ const getUsers = async (req, res) => {
     res.json(usersData);
 };
 
-const deleteUsers = async (req, res) => {
-    // Get the current time
-    const now = new Date();
-    // Get the time 1 minute ago
-    const oneMinuteAgo = new Date(now.getTime() - 1 * 60 * 1000);
-    // Delete all users who haven't logged in the last minute
-    const deletedUsers = await usersService.deleteInactiveUsers(oneMinuteAgo);
-    logger.info(`Deleted ${deletedUsers.length} inactive users`);
-    for (let user of deletedUsers) {
-        let mailOptions = {
-            from: 'forcesOfTheSky@gmail.com',
-            to: user.email,
-            subject: 'Account Deletion Notice',
-            text: 'Your account has been deleted due to inactivity.',
-        };
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                logger.error('An error occured', error);
-            } else {
-                logger.info('Email sent: ', +info.response);
-            }
+const deleteUsers = async (req, res, inactiveTime = 10 * 60 * 1000) => {
+    try {
+        // Take the time declared in the parameters
+        const inactiveDate = new Date(Date.now() - inactiveTime);
+        logger.info(
+            `Deleting users who haven't logged in the last ${
+                inactiveTime / 60000
+            } minutes`
+        );
+
+        // Delete all users who haven't logged
+        const deletedUsers = await usersService.deleteInactiveUsers(
+            inactiveDate
+        );
+        logger.info(`Deleted ${deletedUsers.length} inactive users`);
+
+        // change sendMail from async fn to promise because deleteUsers already is, and that was causing the mails not be sent along the rest of the process
+
+        // Mapping the users that will be removed and then notified by the mail structure declared below
+        const mailPromises = deletedUsers.map((user) => {
+            // Send email to the user
+            return emailService.sendEmail(user);
         });
+
+        // Wait for all emails to be sent
+        await Promise.all(mailPromises);
+
+        logger.info(`Emails sent to ${deletedUsers.length} inactive users`);
+
+        // Delete all users
+        for (const user of deletedUsers) {
+            await this.model.deleteOne({ _id: user._id });
+        }
+
+        logger.info(`Deleted ${deletedUsers.length} inactive users`);
+    } catch (error) {
+        logger.error('An error occurred while deleting users', error);
     }
-    res.json({ message: `Deleted ${deletedUsers.length} inactive users` });
 };
+
 const current = async (req, res) => {
     logger.info('GET /api/sessions/current - fetching current user');
     // The verified user is available as req.user

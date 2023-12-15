@@ -39,6 +39,14 @@ export function requireRole(role) {
     };
 }
 
+export function verifyAdmin(req, res, next) {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).send('Forbidden');
+    }
+}
+
 export function redirectIfAuthenticated(req, res, next) {
     authState.checkedUser ? res.redirect('/api/products/') : next();
 }
