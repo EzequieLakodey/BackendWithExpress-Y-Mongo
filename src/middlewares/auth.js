@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { logger } from './logger.js';
 
 export const authState = {
     checkedUser: null,
@@ -25,6 +26,7 @@ export function verifyToken(req, res, next) {
         // Set the user data in req.user
         req.user = decoded;
         authState.checkedUser = req.user;
+        logger.info(`User authenticated: ${req.user.email}`);
         next();
     });
 }
@@ -32,6 +34,7 @@ export function verifyToken(req, res, next) {
 export function requireRole(role) {
     return function (req, res, next) {
         if (req.user && req.user.role === role) {
+            logger.info(`User role verified: ${req.user.role}`);
             next();
         } else {
             res.status(403).send('Forbidden');
@@ -40,11 +43,8 @@ export function requireRole(role) {
 }
 
 export function verifyAdmin(req, res, next) {
-    if (req.user && req.user.role === 'admin') {
-        next();
-    } else {
-        res.status(403).send('Forbidden');
-    }
+    req.isAdmin = req.user && req.user.role === 'admin';
+    next();
 }
 
 export function redirectIfAuthenticated(req, res, next) {

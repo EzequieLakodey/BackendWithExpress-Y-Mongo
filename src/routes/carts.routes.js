@@ -1,4 +1,4 @@
-import CartsManagerMongo from '../dao/controllers/mongo/carts.mongo.js';
+import { cartsManager } from '../dao/controllers/mongo/carts.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 import { verifyToken } from '../middlewares/auth.js';
@@ -8,7 +8,6 @@ import { logger } from '../middlewares/logger.js';
 
 const router = Router();
 
-const manager = new CartsManagerMongo();
 router.get('/', async (req, res) => {
     try {
         logger.info('GET /api/carts - fetching all carts');
@@ -24,8 +23,8 @@ router.get('/', async (req, res) => {
         }
         pipeline.push({ $skip: skip }, { $limit: limit });
 
-        const carts = await manager.getAllCarts(pipeline);
-        const totalCarts = await manager.getTotalCarts();
+        const carts = await cartsManager.getAllCarts(pipeline);
+        const totalCarts = await cartsManager.getTotalCarts();
         const totalPages = Math.ceil(totalCarts / limit);
         const hasPrevPage = page > 1;
         const hasNextPage = page < totalPages;
@@ -54,7 +53,7 @@ router.get('/:cid', async (req, res) => {
     try {
         const cid = req.params.cid;
         logger.info(`GET /api/carts/:cid - fetching cart ${cid}`);
-        const cart = await manager.getCart(cid);
+        const cart = await cartsManager.getCart(cid);
         if (cart) {
             res.render('cartsDetails', { cart: cart.toObject() });
         } else {
@@ -69,7 +68,7 @@ router.get('/:cid', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const newCart = await manager.createCart();
+        const newCart = await cartsManager.createCart();
         io.emit('new-cart', newCart);
         res.json(newCart);
     } catch (error) {
@@ -80,7 +79,7 @@ router.post('/', async (req, res) => {
 router.post('/:cid/purchase', verifyToken, async (req, res) => {
     try {
         const cid = req.params.cid;
-        const cart = await manager.getCart(cid);
+        const cart = await cartsManager.getCart(cid);
         if (!cart) {
             throw new Error('Cart not found');
         }
@@ -159,7 +158,7 @@ router.put('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         const { quantity } = req.body;
-        const updatedProduct = await manager.addProductToCart(
+        const updatedProduct = await cartsManager.addProductToCart(
             cid,
             pid,
             quantity
@@ -178,7 +177,7 @@ router.put('/:cid', async (req, res) => {
     try {
         const { cid } = req.params;
         const { products } = req.body;
-        const updatedCart = await manager.updateCart(cid, products);
+        const updatedCart = await cartsManager.updateCart(cid, products);
         res.json(updatedCart);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -189,7 +188,7 @@ router.put('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         const { quantity } = req.body;
-        const updatedCart = await manager.updateProductQuantity(
+        const updatedCart = await cartsManager.updateProductQuantity(
             cid,
             pid,
             quantity
@@ -203,7 +202,7 @@ router.put('/:cid/products/:pid', async (req, res) => {
 router.delete('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
-        await manager.removeProductFromCart(cid, pid);
+        await cartsManager.removeProductFromCart(cid, pid);
         logger.info(
             `DELETE /api/carts/:cid/products/:pid - Product ${pid} removed from cart ${cid}`
         );
@@ -217,7 +216,7 @@ router.delete('/:cid/products/:pid', async (req, res) => {
 router.delete('/:cid', async (req, res) => {
     try {
         const { cid } = req.params;
-        const updatedCart = await manager.removeAllProducts(cid);
+        const updatedCart = await cartsManager.removeAllProducts(cid);
         res.json(updatedCart);
     } catch (error) {
         res.status(500).json({ error: error.message });

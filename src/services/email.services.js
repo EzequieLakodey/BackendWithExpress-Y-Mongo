@@ -3,16 +3,17 @@ import { logger } from '../middlewares/logger.js';
 
 class EmailService {
     async sendEmail(user) {
+        logger.info('Sending email to: ', user.email);
         let transporter = nodemailer.createTransport({
             service: 'gmail',
             port: 587,
             auth: {
-                user: 'forcesofthesky@gmail.com',
-                pass: 'wiub pyrz ryty wnsn',
+                user: process.env.NODE_MAILER_MAIL,
+                pass: process.env.NODE_MAILER_PASS,
             },
         });
         let mailOptions = {
-            from: 'forcesofthesky@gmail.com',
+            from: process.env.NODE_MAILER_MAIL,
             to: user.email,
             subject: 'Deletion account',
             html: `
@@ -40,4 +41,4 @@ class EmailService {
     }
 }
 
-export default EmailService;
+export const emailService = new EmailService();

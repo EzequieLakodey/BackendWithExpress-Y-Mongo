@@ -154,4 +154,4 @@ class CartsManagerMongo {
     async update() {}
 }
 
-export default CartsManagerMongo;
+export const cartsManager = new CartsManagerMongo();

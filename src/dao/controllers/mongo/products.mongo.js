@@ -68,4 +68,4 @@ class ProductsManagerMongo {
     }
 }
 
-export default ProductsManagerMongo;
+export const productsManager = new ProductsManagerMongo();

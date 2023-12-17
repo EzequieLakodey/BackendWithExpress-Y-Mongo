@@ -1,6 +1,6 @@
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
-import { usersService } from '../dao/index.js';
+import { usersMongo } from '../dao/controllers/mongo/users.mongo.js';
 import githubStrategy from 'passport-github2';
 import { config } from './config.js';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
@@ -25,7 +25,7 @@ export const initializePassport = () => {
                 try {
                     const { first_name } = req.body;
                     //verificar si el usuario ya se registro
-                    const user = await usersService.getByEmail(username);
+                    const user = await usersMongo.getByEmail(username);
                     if (user) {
                         return done(null, false);
                     }
@@ -34,7 +34,7 @@ export const initializePassport = () => {
                         email: username,
                         password: createHash(password),
                     };
-                    const userCreated = await usersService.save(newUser);
+                    const userCreated = await usersMongo.save(newUser);
                     return done(null, userCreated); //En este punto passport completa el proceso de manera satisfactoria
                 } catch (error) {
                     return done(error);
@@ -52,7 +52,7 @@ export const initializePassport = () => {
             async (username, password, done) => {
                 try {
                     //verificar si el usuario ya se registro
-                    const user = await usersService.getByEmail(username);
+                    const user = await usersMongo.getByEmail(username);
                     if (!user) {
                         return done(null, false);
                     }
@@ -80,14 +80,14 @@ export const initializePassport = () => {
             async (accessToken, refreshToken, profile, done) => {
                 try {
                     let email = `${profile.username}@github.com`;
-                    let user = await usersService.getByEmail(email);
+                    let user = await usersMongo.getByEmail(email);
                     if (!user) {
                         const newUser = {
                             email: email,
                             first_name: profile.username,
                             password: process.env.DEFAULT_PWD || 'githubuser', //default password for github users
                         };
-                        const userCreated = await usersService.save(newUser);
+                        const userCreated = await usersMongo.save(newUser);
                         return done(null, userCreated);
                     } else {
                         return done(null, user);
@@ -131,7 +131,7 @@ export const initializePassport = () => {
     passport.use(
         'current',
         new JwtStrategy(opts, function (jwt_payload, done) {
-            usersService
+            usersMongo
                 .getById(jwt_payload.id)
                 .then((user) => {
                     if (user) {

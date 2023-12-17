@@ -1,16 +1,14 @@
 import { Router } from 'express';
 import { logger } from '../../middlewares/logger.js';
-
-import ProductsManagerMongo from '../../dao/controllers/mongo/products.mongo.js';
+import { productsManager } from '../../dao/controllers/mongo/products.mongo.js';
 
 const router = Router();
-const mongoManager = new ProductsManagerMongo();
 
 router.post('/', async (req, res) => {
     try {
         logger.info('POST /api/products-test/ - posting product');
         const product = req.body;
-        const newProduct = await mongoManager.addProduct(product);
+        const newProduct = await productsManager.addProduct(product);
         res.json(newProduct);
     } catch (error) {
         logger.error(`POST /api/products-test/ - ${error.message}`);
@@ -23,7 +21,7 @@ router.get('/', async (req, res) => {
         logger.info('GET /api/products-test/ - fetching all products');
         const page = parseInt(req.query.page) || 1;
         const size = parseInt(req.query.size) || 10;
-        const products = await mongoManager.getProducts({
+        const products = await productsManager.getProducts({
             page: page,
             limit: size,
         });
@@ -38,7 +36,7 @@ router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
         logger.info(`GET /api/products-test/:pid - fetching product ${pid}`);
-        const product = await mongoManager.getProductsById(pid);
+        const product = await productsManager.getProductsById(pid);
         if (product) {
             res.json(product);
         } else {
@@ -54,7 +52,10 @@ router.put('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
         logger.info(`PUT /api/products-test/:pid - updating product ${pid}`);
-        const updatedProduct = await mongoManager.updateProduct(pid, req.body);
+        const updatedProduct = await productsManager.updateProduct(
+            pid,
+            req.body
+        );
         if (updatedProduct) {
             res.json(updatedProduct);
         } else {
@@ -70,7 +71,7 @@ router.delete('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
         logger.info(`DELETE /api/products-test/:pid - deleting product ${pid}`);
-        const deletedProductId = await mongoManager.deleteProduct(pid);
+        const deletedProductId = await productsManager.deleteProduct(pid);
         if (deletedProductId) {
             res.json({
                 message: `Product ${deletedProductId} deleted successfully`,

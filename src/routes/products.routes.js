@@ -1,5 +1,4 @@
-import ProductsManager from '../dao/controllers/fs/productsManager.js';
-import ProductsManagerMongo from '../dao/controllers/mongo/products.mongo.js';
+import { productsManager } from '../dao/controllers/mongo/products.mongo.js';
 import { Router } from 'express';
 import { io } from '../servers.js';
 import { verifyToken, requireRole } from '../middlewares/auth.js';
@@ -7,8 +6,6 @@ import { faker } from '@faker-js/faker';
 import { logger } from '../middlewares/logger.js';
 
 const router = Router();
-const mongoManager = new ProductsManagerMongo();
-const fileManager = new ProductsManager('products.json');
 
 router.get('/', async (req, res) => {
     let first_name, email;
@@ -22,11 +19,11 @@ router.get('/', async (req, res) => {
         logger.info('GET /api/products - fetching all products');
         const page = parseInt(req.query.page) || 1;
         const size = parseInt(req.query.size) || 10;
-        const products = await mongoManager.getProducts({
+        const products = await productsManager.getProducts({
             page: page,
             limit: size,
         });
-        const total = await mongoManager.getTotalProducts(); // use getTotalProducts instead of countProducts
+        const total = await productsManager.getTotalProducts(); // use getTotalProducts instead of countProducts
         const pages = Math.ceil(total / size);
         const prevPage = page - 1 > 0 ? page - 1 : null;
         const nextPage = page + 1 <= pages ? page + 1 : null;
@@ -65,7 +62,7 @@ router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
         logger.info(`GET /api/products/:pid - fetching product ${pid}`);
-        const product = await mongoManager.getProductsById(pid);
+        const product = await productsManager.getProductsById(pid);
         if (product) {
             res.render('productsDetails', { product: product.toObject() });
         } else {
@@ -82,7 +79,7 @@ router.post('/', verifyToken, requireRole('admin'), async (req, res) => {
         logger.info('POST /api/products - posting product');
         const product = req.body;
         const newProductFile = await fileManager.addProduct(product);
-        const newProductMongo = await mongoManager.addProduct(product);
+        const newProductMongo = await productsManager.addProduct(product);
         io.emit('new-product', newProductFile);
         res.json({
             fileSystemProduct: newProductFile,

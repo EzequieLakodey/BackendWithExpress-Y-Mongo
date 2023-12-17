@@ -21,7 +21,6 @@ import swaggerUI from 'swagger-ui-express';
 import { productsTestRouter } from './test/routes/products.test.routes.js';
 import { cartsTestRouter } from './test/routes/carts.test.routes.js';
 import fs from 'fs';
-import { usersRouter } from './routes/users.routes.js';
 
 /* MODULES */
 
@@ -71,7 +70,6 @@ app.use('/api/chats', chatRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/loggerTest', loggerTestRoute);
 app.use('/api/products-test', productsTestRouter);
-app.use('/api/admin/users', usersRouter);
 app.use('/api/carts-test', cartsTestRouter);
 
 app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpecs));

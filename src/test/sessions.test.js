@@ -1,24 +1,34 @@
-/* eslint-disable no-undef */
 import chai from 'chai';
-import UsersMongo from '../dao/controllers/mongo/users.mongo.js';
-import { usersModel } from '../dao/models/users.model.js';
+import { usersMongo } from '../dao/controllers/mongo/users.mongo.js';
 import { UserDTO } from '../dto/users.dto.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import app from '../app.js';
 import { authState } from '../middlewares/auth.js';
-import sessionsMongo from '../dao/controllers/mongo/sessions.mongo.js';
-
-// Insalled sinon libraries to mock the time and don't depend on real time for the testing
+import { logger } from '../middlewares/logger.js';
+import { emailService } from '../services/email.services.js';
 import Sinon from 'sinon';
 
-const { expect } = chai;
-let usersMongo, token, savedUser, testEmail;
+// Create a mock of the EmailService
+Sinon.stub(emailService, 'sendEmail').resolves();
 
-// eslint-disable-next-line no-undef
+// Mock only setTimeout and setInterval
+Sinon.useFakeTimers({
+    toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
+});
+
+beforeEach(() => {});
+
+// After each test
+afterEach(() => {
+    Sinon.restore();
+});
+
+const { expect } = chai;
+let token, savedUser, testEmail;
+
 describe('Sessions API', function () {
     before(async function () {
-        usersMongo = new UsersMongo();
         testEmail = `test${Date.now()}@example.com`;
 
         const userDto = new UserDTO({
@@ -43,6 +53,15 @@ describe('Sessions API', function () {
         }
         const match = await bcrypt.compare('password', loginUserDto.password);
         expect(match).to.be.true;
+
+        // Set last_login to more than two days ago
+        const moreThanTwoDaysAgo = new Date();
+        moreThanTwoDaysAgo.setDate(moreThanTwoDaysAgo.getDate() - 3);
+        savedUser.last_login = moreThanTwoDaysAgo;
+
+        // Update the user in the database
+        await usersMongo.update(savedUser);
+        logger.info('updated user:', savedUser);
 
         token = jwt.sign(
             {
@@ -84,26 +103,30 @@ describe('Sessions API', function () {
     });
 
     it('should delete inactive users', async () => {
+        Sinon.stub(emailService, 'sendEmail').resolves();
+
         // Mock the current time
-        const now = new Date();
-        const clock = Sinon.useFakeTimers(now.getTime());
+        const clock = Sinon.useFakeTimers();
 
         // Make the user created to be inactive
-        const oneMinuteAgo = new Date(now.getTime() - 60 * 1000);
-        const deletedUsers = await usersMongo.deleteInactiveUsers(oneMinuteAgo);
-        expect(deletedUsers).to.be.an('array');
-        deletedUsers.forEach((user) => {
-            expect(user.last_login).to.be.below(oneMinuteAgo);
-        });
+        const moreThanTwoDaysAgo = new Date();
+        moreThanTwoDaysAgo.setDate(moreThanTwoDaysAgo.getDate() - 3);
+        savedUser.last_login = moreThanTwoDaysAgo;
 
-        // Call the deleteUsers function
-        await sessionsMongo.deleteUsers(null, null, 60 * 1000);
+        // Update the user in the database
+        await usersMongo.update(savedUser);
+
+        // Advance the clock to simulate the passage of two days
+        clock.tick(172800000);
+
+        // Call deleteInactiveUsers function directly
+        const deletedUsers = await usersMongo.deleteInactiveUsers(emailService);
+
+        // Check if any users were deleted
+        expect(deletedUsers).to.be.an('array');
+        expect(deletedUsers).to.have.lengthOf(1); // Expect one user to be deleted
 
         // Restore the original time
         clock.restore();
-    });
-
-    after(async function () {
-        await usersModel.deleteOne({ email: testEmail });
     });
 });

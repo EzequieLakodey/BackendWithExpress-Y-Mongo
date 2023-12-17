@@ -1,15 +1,13 @@
 import { Router } from 'express';
 import { logger } from '../../middlewares/logger.js';
-
-import CartsManagerMongo from '../../dao/controllers/mongo/carts.mongo.js';
+import { cartsManager } from '../../dao/controllers/mongo/carts.mongo.js';
 
 const router = Router();
-const mongoManager = new CartsManagerMongo();
 
 router.get('/', async (req, res) => {
     try {
         logger.info('GET /api/carts-test/ - fetching all carts');
-        const carts = await mongoManager.getAllCarts();
+        const carts = await cartsManager.getAllCarts();
         res.json(carts);
     } catch (error) {
         logger.error(`GET /api/carts-test/ - ${error.message}`);
@@ -19,7 +17,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const newCart = await mongoManager.createCart();
+        const newCart = await cartsManager.createCart();
         res.json(newCart);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -30,7 +28,7 @@ router.put('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         const { quantity } = req.body;
-        const updatedProduct = await mongoManager.addProductToCart(
+        const updatedProduct = await cartsManager.addProductToCart(
             cid,
             pid,
             quantity
@@ -45,7 +43,7 @@ router.put('/:cid/products/:pid/quantity', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         const { quantity } = req.body;
-        const updatedCart = await mongoManager.updateProductQuantity(
+        const updatedCart = await cartsManager.updateProductQuantity(
             cid,
             pid,
             quantity
@@ -59,7 +57,7 @@ router.put('/:cid/products/:pid/quantity', async (req, res) => {
 router.delete('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
-        await mongoManager.removeProductFromCart(cid, pid);
+        await cartsManager.removeProductFromCart(cid, pid);
         res.json({ message: 'Product removed from cart' });
     } catch (error) {
         res.status(500).json({ error: error.message });

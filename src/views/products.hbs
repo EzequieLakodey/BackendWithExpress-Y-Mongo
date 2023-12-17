@@ -12,11 +12,13 @@
         {{> navbar}}
     </div>
     <header>
+        <div>
 
-        {{#if first_name}}
-        <h1>Welcome, {{first_name}}!</h1>
-        <p>Your registered email is: {{email}}</p>
-        {{/if}}
+            {{#if first_name}}
+            <h1>Welcome, {{first_name}}!</h1>
+            <p>Your registered email is: {{email}}</p>
+            {{/if}}
+        </div>
     </header>
 
     {{#if first_name}}

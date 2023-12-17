@@ -1,13 +1,11 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../app.js'; // import your express app
-import ProductsManagerMongo from '../dao/controllers/mongo/products.mongo.js';
+import { productsManager } from '../dao/controllers/mongo/products.mongo.js';
 
 chai.use(chaiHttp);
 const { expect } = chai;
 let productId;
-
-let mongoManager = new ProductsManagerMongo();
 
 beforeEach((done) => {
     // create a new product
@@ -20,7 +18,7 @@ beforeEach((done) => {
         stock: 196,
     };
 
-    mongoManager
+    productsManager
         .addProduct(product)
         .then((savedProduct) => {
             productId = savedProduct._id;

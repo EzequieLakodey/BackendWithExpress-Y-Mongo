@@ -1,16 +1,12 @@
-/* eslint-disable no-undef */
-import { usersService } from '../../index.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserDTO } from '../../../dto/users.dto.js';
 import { authState } from '../../../middlewares/auth.js';
 import { logger } from '../../../middlewares/logger.js';
-import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import EmailService from '../../../services/email.services.js';
-dotenv.config();
+import { usersMongo } from './users.mongo.js';
 
-const emailService = new EmailService();
+dotenv.config();
 
 const renderLoginPage = (req, res) => {
     logger.info('GET /api/sessions/login - rendering login page');
@@ -48,7 +44,7 @@ const register = async (req, res) => {
         req.body;
         const signupForm = req.body;
         // Check if the user already exists
-        const user = await usersService.getByEmail(signupForm.email);
+        const user = await usersMongo.getByEmail(signupForm.email);
         if (user) {
             logger.warning(
                 'POST /api/sessions/signup - user already registered'
@@ -67,7 +63,7 @@ const register = async (req, res) => {
         signupForm.role =
             signupForm.email === 'admin@coder.com' ? 'admin' : 'user';
         // Save the user to the database
-        const savedUser = await usersService.save(signupForm);
+        const savedUser = await usersMongo.save(signupForm);
         // Generate a JWT
         const token = jwt.sign(
             {
@@ -90,11 +86,11 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    req.body;
     try {
+        req.body;
         logger.info('POST /api/sessions/login - user attempting to log in');
         const loginForm = req.body;
-        const user = await usersService.getByEmail(loginForm.email);
+        const user = await usersMongo.getByEmail(loginForm.email);
         if (!user) {
             logger.error(
                 'POST /api/sessions/login - No user found with the provided email'
@@ -125,7 +121,7 @@ const login = async (req, res) => {
         }
         if (process.env.NODE_ENV !== 'test') {
             user.last_login = new Date();
-            await usersService.update(user);
+            await usersMongo.update(user);
         }
         // Generate a JWT
         const token = jwt.sign(
@@ -135,6 +131,7 @@ const login = async (req, res) => {
                 first_name: user.first_name,
                 role: user.role,
             },
+            // eslint-disable-next-line no-undef
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -158,52 +155,31 @@ const logout = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
-    const users = await usersService.getAll();
+    const users = await usersMongo.getAll();
     const usersData = users.map((user) => ({
+        _id: user._id,
         first_name: user.first_name,
         email: user.email,
         role: user.role,
     }));
-    res.json(usersData);
+    if (req.isAdmin) {
+        res.render('users', { users: usersData });
+    } else {
+        res.json(usersData);
+    }
 };
 
-const deleteUsers = async (req, res, inactiveTime = 10 * 60 * 1000) => {
+const deleteUsers = async (req, res) => {
     try {
-        // Take the time declared in the parameters
-        const inactiveDate = new Date(Date.now() - inactiveTime);
-        logger.info(
-            `Deleting users who haven't logged in the last ${
-                inactiveTime / 60000
-            } minutes`
-        );
+        // Delete all users who haven't logged in the last 2 days
+        const deletedUsers = await usersMongo.deleteInactiveUsers();
 
-        // Delete all users who haven't logged
-        const deletedUsers = await usersService.deleteInactiveUsers(
-            inactiveDate
-        );
-        logger.info(`Deleted ${deletedUsers.length} inactive users`);
-
-        // change sendMail from async fn to promise because deleteUsers already is, and that was causing the mails not be sent along the rest of the process
-
-        // Mapping the users that will be removed and then notified by the mail structure declared below
-        const mailPromises = deletedUsers.map((user) => {
-            // Send email to the user
-            return emailService.sendEmail(user);
+        // Send a response back to the client
+        res.status(200).json({
+            message: `Deleted ${deletedUsers.length} inactive users`,
         });
-
-        // Wait for all emails to be sent
-        await Promise.all(mailPromises);
-
-        logger.info(`Emails sent to ${deletedUsers.length} inactive users`);
-
-        // Delete all users
-        for (const user of deletedUsers) {
-            await this.model.deleteOne({ _id: user._id });
-        }
-
-        logger.info(`Deleted ${deletedUsers.length} inactive users`);
     } catch (error) {
-        logger.error('An error occurred while deleting users', error);
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -214,7 +190,47 @@ const current = async (req, res) => {
     res.json(userDto);
 };
 
+const deleteUser = async (req, res) => {
+    const userId = req.params.id;
+    logger.info(`DELETE /api/sessions/users/${userId}, ${req.params}`);
+    await usersMongo.deleteUser(userId);
+    res.status(200).json({ message: 'User deleted' });
+};
+
+const modifyRole = async (req, res) => {
+    const userId = req.params.id;
+    const newRole = req.body.role;
+
+    if (!newRole) {
+        return res
+            .status(400)
+            .json({ error: 'Role not provided in the request body' });
+    }
+
+    logger.info(`PUT /api/sessions/users/${userId}, ${req.params} ${req.body}`);
+
+    try {
+        const user = await usersMongo.getById(userId);
+        if (!user) {
+            return res
+                .status(404)
+                .json({ error: `User with ID ${userId} not found` });
+        }
+
+        user.role = newRole;
+        await usersMongo.update(user);
+        res.status(200).json({ message: 'Role updated' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+export { deleteUser, modifyRole };
+
 export default {
+    deleteUser,
+    modifyRole,
     register,
     login,
     current,

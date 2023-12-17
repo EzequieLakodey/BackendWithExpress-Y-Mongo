@@ -1,19 +1,46 @@
 import { Router } from 'express';
 import passport from 'passport';
-import { redirectIfAuthenticated, verifyToken } from '../middlewares/auth.js';
+import {
+    redirectIfAuthenticated,
+    verifyToken,
+    requireRole,
+    verifyAdmin,
+} from '../middlewares/auth.js';
 import jwt from 'jsonwebtoken';
 import sessionsMongo from '../dao/controllers/mongo/sessions.mongo.js';
 
 const router = Router();
 
 router.get('/login', redirectIfAuthenticated, sessionsMongo.renderLoginPage);
+
 router.get('/signup', redirectIfAuthenticated, sessionsMongo.renderSignupPage);
+
 router.get('/profile', verifyToken, sessionsMongo.renderProfilePage);
+
 router.get('/current', verifyToken, sessionsMongo.current);
-router.get('/users', sessionsMongo.getUsers);
+
+router.get('/users', verifyToken, verifyAdmin, sessionsMongo.getUsers);
+
 router.post('/signup', sessionsMongo.register);
+
 router.post('/login', sessionsMongo.login);
+
 router.post('/logout', sessionsMongo.logout);
+
+router.put(
+    '/users/:id',
+    verifyToken,
+    requireRole('admin'),
+    sessionsMongo.modifyRole
+);
+
+router.delete(
+    '/users/:id',
+    verifyToken,
+    requireRole('admin'),
+    sessionsMongo.deleteUser
+);
+
 router.delete('/users', sessionsMongo.deleteUsers);
 
 // GitHub authentication route
