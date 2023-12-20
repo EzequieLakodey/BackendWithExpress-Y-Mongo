@@ -2,6 +2,7 @@ import { usersModel } from '../../models/users.model.js';
 import { UserDTO } from '../../../dto/users.dto.js';
 import { logger } from '../../../middlewares/logger.js';
 import { emailService } from '../../../services/email.services.js';
+import { cartsManager } from './carts.mongo.js';
 
 class UsersMongo {
     constructor() {
@@ -16,6 +17,8 @@ class UsersMongo {
             role: userDto.role,
             last_login: Date.now(),
         });
+
+        await user.save();
         return new UserDTO(user.toObject());
     }
 
@@ -33,9 +36,24 @@ class UsersMongo {
         }
     }
 
+    async getCart(userId) {
+        const user = await this.model.findById(userId).populate({
+            path: 'cart',
+            populate: {
+                path: 'products.product',
+            },
+        });
+        if (user && user.cart) {
+            return user.cart;
+        } else {
+            throw new Error(`User with ID ${userId} not found`);
+        }
+    }
+
     async getByEmail(userEmail) {
         const user = await this.model.findOne({ email: userEmail });
         if (user) {
+            await user.save();
             return user.toObject();
         } else {
             return null;
@@ -88,6 +106,18 @@ class UsersMongo {
         logger.info(`Changing role of user with ID: ${userId} to ${newRole}`);
         user.role = newRole;
         await user.save();
+    }
+
+    async makeUserPremium(userId) {
+        const user = await this.model.findById(userId);
+        if (!user) {
+            logger.error(`User with ID ${userId} not found`);
+            throw new Error(`User with ID ${userId} not found`);
+        }
+        user.premium = true;
+        logger.info(`User with ID ${userId} is now premium`);
+        await user.save();
+        return new UserDTO(user);
     }
 }
 

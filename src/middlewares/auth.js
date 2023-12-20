@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { logger } from './logger.js';
+import { usersMongo } from '../dao/controllers/mongo/users.mongo.js';
 
 export const authState = {
     checkedUser: null,
@@ -18,13 +19,19 @@ export function verifyToken(req, res, next) {
         return res.status(401).json({ error: 'No token provided' });
     }
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err) {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
+        // Fetch the user's information from the database
+        const user = await usersMongo.getById(decoded._id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
         // Set the user data in req.user
-        req.user = decoded;
+        req.user = user;
         authState.checkedUser = req.user;
         logger.info(`User authenticated: ${req.user.email}`);
         next();
@@ -49,4 +56,18 @@ export function verifyAdmin(req, res, next) {
 
 export function redirectIfAuthenticated(req, res, next) {
     authState.checkedUser ? res.redirect('/api/products/') : next();
+}
+
+export function verifyPremium(req, res, next) {
+    req.isPremium = req.user && req.user.premium;
+    next();
+}
+
+export async function refreshUser(req, res, next) {
+    if (req.user) {
+        const freshUser = await usersMongo.getById(req.user._id);
+        req.user.role = freshUser.role;
+        req.user.premium = freshUser.premium;
+    }
+    next();
 }

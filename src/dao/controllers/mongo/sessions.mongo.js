@@ -5,6 +5,7 @@ import { authState } from '../../../middlewares/auth.js';
 import { logger } from '../../../middlewares/logger.js';
 import dotenv from 'dotenv';
 import { usersMongo } from './users.mongo.js';
+import { cartsManager } from './carts.mongo.js';
 
 dotenv.config();
 
@@ -46,9 +47,7 @@ const register = async (req, res) => {
         // Check if the user already exists
         const user = await usersMongo.getByEmail(signupForm.email);
         if (user) {
-            logger.warning(
-                'POST /api/sessions/signup - user already registered'
-            );
+            logger.warning('POST /api/sessions/signup - user already registered');
 
             return res.status(400).render('signup', {
                 error: 'User already exists',
@@ -60,8 +59,7 @@ const register = async (req, res) => {
         }
         signupForm.password = await bcrypt.hash(signupForm.password, 10);
         // Set the role based on the email
-        signupForm.role =
-            signupForm.email === 'admin@coder.com' ? 'admin' : 'user';
+        signupForm.role = signupForm.email === 'admin@coder.com' ? 'admin' : 'user';
         // Save the user to the database
         const savedUser = await usersMongo.save(signupForm);
         // Generate a JWT
@@ -71,6 +69,7 @@ const register = async (req, res) => {
                 first_name: savedUser.first_name,
                 email: savedUser.email,
                 role: savedUser.role,
+                cartId: savedUser.cartId,
             },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
@@ -92,36 +91,22 @@ const login = async (req, res) => {
         const loginForm = req.body;
         const user = await usersMongo.getByEmail(loginForm.email);
         if (!user) {
-            logger.error(
-                'POST /api/sessions/login - No user found with the provided email'
-            );
-            return res
-                .status(404)
-                .send({ error: 'No user found with the provided email' });
+            logger.warning('POST /api/sessions/login - invalid email or password');
+            return res.status(401).render('login', { error: 'Invalid email or password' });
         }
-        if (!user) {
-            logger.warning(
-                'POST /api/sessions/login - invalid email or password'
-            );
-            return res
-                .status(401)
-                .render('login', { error: 'Invalid email or password' });
-        }
-        if (
-            !loginForm.password ||
-            !user.password ||
-            !bcrypt.compareSync(loginForm.password, user.password)
-        ) {
-            logger.warning(
-                'POST /api/sessions/login - invalid email or password'
-            );
-            return res
-                .status(401)
-                .render('login', { error: 'Invalid email or password' });
+        if (!loginForm.password || !user.password || !bcrypt.compareSync(loginForm.password, user.password)) {
+            logger.warning('POST /api/sessions/login - invalid email or password');
+            return res.status(401).render('login', { error: 'Invalid email or password' });
         }
         if (process.env.NODE_ENV !== 'test') {
             user.last_login = new Date();
             await usersMongo.update(user);
+        }
+        if (!user.cart) {
+            // If not, create a new cart
+            const newCart = await cartsManager.createCart();
+            user.cart = newCart._id;
+            await user.save();
         }
         // Generate a JWT
         const token = jwt.sign(
@@ -202,9 +187,7 @@ const modifyRole = async (req, res) => {
     const newRole = req.body.role;
 
     if (!newRole) {
-        return res
-            .status(400)
-            .json({ error: 'Role not provided in the request body' });
+        return res.status(400).json({ error: 'Role not provided in the request body' });
     }
 
     logger.info(`PUT /api/sessions/users/${userId}, ${req.params} ${req.body}`);
@@ -212,23 +195,47 @@ const modifyRole = async (req, res) => {
     try {
         const user = await usersMongo.getById(userId);
         if (!user) {
-            return res
-                .status(404)
-                .json({ error: `User with ID ${userId} not found` });
+            return res.status(404).json({ error: `User with ID ${userId} not found` });
         }
 
         user.role = newRole;
         await usersMongo.update(user);
         res.status(200).json({ message: 'Role updated' });
     } catch (error) {
-        console.error(error);
+        logger.error(`PUT /api/sessions/users/${userId} - ${error.message}`);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
 
-export { deleteUser, modifyRole };
+const makeUserPremium = async (req, res) => {
+    try {
+        logger.info('PUT /api/sessions/profile - user making themselves premium');
+        const user = await usersMongo.makeUserPremium(req.user._id);
+        res.json(user);
+    } catch (error) {
+        logger.error(`PUT /api/sessions/profile - ${error.message}`);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getUserCart = async (req, res) => {
+    try {
+        const user = req.user;
+        logger.info(`GET /api/users/me/cart - fetching cart for user ${user._id}`);
+        const cart = await usersMongo.getCart(user._id);
+        if (cart) {
+            res.render('cart', { cart: cart.toObject() });
+        } else {
+            res.status(404).json({ error: 'Cart not found' });
+        }
+    } catch (error) {
+        logger.error(`GET /api/users/me/cart - ${error.message}`);
+        res.status(500).json({ error: error.message });
+    }
+};
 
 export default {
+    getUserCart,
     deleteUser,
     modifyRole,
     register,
@@ -241,4 +248,5 @@ export default {
     renderSignupPage,
     renderProfilePage,
     getCurrentUser,
+    makeUserPremium,
 };

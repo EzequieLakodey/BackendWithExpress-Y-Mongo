@@ -3,7 +3,7 @@ document.querySelectorAll('.delete-user').forEach((button) => {
         const userId = event.target.closest('.delete-user').dataset.id;
         console.log(`Deleting user with ID: ${userId}`);
         await fetch(`/api/sessions/users/${userId}`, { method: 'DELETE' });
-        //window.location.reload();
+        window.location.reload();
     });
 });
 
@@ -19,6 +19,6 @@ document.querySelectorAll('.role-select').forEach((select) => {
             credentials: 'include',
         });
 
-        //window.location.reload();
+        window.location.reload();
     });
 });

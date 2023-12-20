@@ -98,9 +98,7 @@ router.post('/:cid/purchase', verifyToken, async (req, res) => {
         // Iterate over each product in the cart
         for (let product of cart.products) {
             // Validate if there is enough stock for each product
-            const productData = await this.productModel.findById(
-                product.productId
-            );
+            const productData = await this.productModel.findById(product.productId);
             if (productData.stock < product.quantity) {
                 // If not enough stock, add product to unpurchasedProducts array
                 unpurchasedProducts.push(product.productId);
@@ -124,25 +122,19 @@ router.post('/:cid/purchase', verifyToken, async (req, res) => {
         await ticket.save();
 
         // Remove purchased products from the cart
-        cart.products = cart.products.filter((product) =>
-            unpurchasedProducts.includes(product.productId)
-        );
+        cart.products = cart.products.filter((product) => unpurchasedProducts.includes(product.productId));
         await cart.save();
 
         // Return the unpurchased products if any
         if (unpurchasedProducts.length > 0) {
-            logger.info(
-                'POST /api/carts/:cid/purchase - Purchase completed with some products unavailable'
-            );
+            logger.info('POST /api/carts/:cid/purchase - Purchase completed with some products unavailable');
             res.json({
                 message: 'Purchase completed with some products unavailable',
                 user: userDto,
                 unpurchasedProducts,
             });
         } else {
-            logger.info(
-                'POST /api/carts/:cid/purchase - Purchase completed successfully'
-            );
+            logger.info('POST /api/carts/:cid/purchase - Purchase completed successfully');
             res.json({
                 message: 'Purchase completed successfully',
                 user: userDto,
@@ -150,25 +142,6 @@ router.post('/:cid/purchase', verifyToken, async (req, res) => {
         }
     } catch (error) {
         logger.error(`POST /api/carts/:cid/purchase - ${error.message}`);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-router.put('/:cid/products/:pid', async (req, res) => {
-    try {
-        const { cid, pid } = req.params;
-        const { quantity } = req.body;
-        const updatedProduct = await cartsManager.addProductToCart(
-            cid,
-            pid,
-            quantity
-        );
-        logger.info(
-            `PUT /api/carts/:cid/products/:pid - Product ${pid} added to cart ${cid}`
-        );
-        res.json(updatedProduct);
-    } catch (error) {
-        logger.error(`PUT /api/carts/:cid/products/:pid - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
@@ -187,14 +160,20 @@ router.put('/:cid', async (req, res) => {
 router.put('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
-        const { quantity } = req.body;
-        const updatedCart = await cartsManager.updateProductQuantity(
-            cid,
-            pid,
-            quantity
-        );
-        res.json(updatedCart);
+        const { quantity, products } = req.body;
+
+        if (quantity) {
+            const updatedProduct = await cartsManager.addProductToCart(cid, pid, quantity);
+            logger.info(`PUT /api/carts/:cid/products/:pid - Product ${pid} added to cart ${cid}`);
+            res.json(updatedProduct);
+        } else if (products) {
+            const updatedCart = await cartsManager.updateCart(cid, products);
+            res.json(updatedCart);
+        } else {
+            res.status(400).json({ error: 'Invalid request' });
+        }
     } catch (error) {
+        logger.error(`PUT /api/carts/:cid/products/:pid - ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
@@ -203,9 +182,7 @@ router.delete('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         await cartsManager.removeProductFromCart(cid, pid);
-        logger.info(
-            `DELETE /api/carts/:cid/products/:pid - Product ${pid} removed from cart ${cid}`
-        );
+        logger.info(`DELETE /api/carts/:cid/products/:pid - Product ${pid} removed from cart ${cid}`);
         res.json({ message: 'Product removed from cart' });
     } catch (error) {
         logger.error(`DELETE /api/carts/:cid/products/:pid - ${error.message}`);

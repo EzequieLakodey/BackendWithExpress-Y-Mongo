@@ -19,13 +19,17 @@ const userSchema = new mongoose.Schema({
     },
     cart: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Cart',
+        ref: 'carts',
     },
     role: {
         type: String,
         required: true,
         default: 'user',
         enum: ['user', 'admin'],
+    },
+    premium: {
+        type: Boolean,
+        default: false,
     },
     last_login: {
         type: Date,

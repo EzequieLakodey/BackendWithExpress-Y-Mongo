@@ -8,11 +8,9 @@
 </head>
 
 <body>
-
     <div>
         {{> navbar}}
     </div>
-
     <article>
         <div>
             <h1>title: {{product.title}}</h1>
@@ -36,14 +34,11 @@
             <p>code: {{product.code}}</p>
         </div>
         <div>
-
-            <button class='add-to-cart' data-product-id='{{product._id}}' data-cart-id='{{cart._id}}'>Add to
-                Cart</button>
+            <button class='add-to-cart' data-product-id='{{product._id}}' data-user-id='{{user._id}}'
+                data-cart-id='{{cart._id}}'>Add to Cart</button>
         </div>
     </article>
+    <script src='/js/addProductsToCarts.js'></script>
 </body>
 
 </html>
-
-
-<script src='/js/addProductsToCarts.js'></script>

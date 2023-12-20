@@ -38,14 +38,26 @@ httpServer.listen(port, () => {
 
 connectDB();
 
-const hbs = handlebars.create({ defaultLayout: null, extname: '.hbs' });
-hbs.handlebars.registerPartial(
-    'navbar',
-    fs.readFileSync(
-        path.join(__dirname, 'views', 'partials', 'navbar.hbs'),
-        'utf8'
-    )
-);
+const hbs = handlebars.create({
+    defaultLayout: null,
+    extname: '.hbs',
+    helpers: {
+        eq: function (v1, v2) {
+            return v1 === v2;
+        },
+        multiply: function (v1, v2) {
+            return v1 * v2;
+        },
+        totalCost: function (products) {
+            let total = 0;
+            for (let product of products) {
+                total += product.quantity * product.product.price;
+            }
+            return total;
+        },
+    },
+});
+hbs.handlebars.registerPartial('navbar', fs.readFileSync(path.join(__dirname, 'views', 'partials', 'navbar.hbs'), 'utf8'));
 
 hbs.handlebars.registerHelper('eq', function (a, b) {
     return a === b;

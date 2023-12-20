@@ -7,26 +7,22 @@
 </head>
 
 <body>
-
     <div>
         {{> navbar}}
     </div>
     <header>
         <div>
-
             {{#if first_name}}
             <h1>Welcome, {{first_name}}!</h1>
             <p>Your registered email is: {{email}}</p>
             {{/if}}
         </div>
     </header>
-
     {{#if first_name}}
     <form action='/api/sessions/logout' method='POST'>
         <button type='submit'>Logout</button>
     </form>
     {{/if}}
-
     <main>
         <div>
             {{#if prevPage}}
@@ -34,14 +30,11 @@
             {{/if}}
         </div>
         <div>
-
             {{#if nextPage}}
             <a href='/api/products?page={{nextPage}}'>Next page</a>
             {{/if}}
         </div>
-
         <h1>Products</h1>
-
         {{#each products}}
         <div>
             <ul>
@@ -69,10 +62,8 @@
         </div>
         {{/each}}
     </main>
+    <script src='/socket.io/socket.io.js'></script>
+    <script type='module' src='/js/index.js'></script>
 </body>
 
 </html>
-
-<script src='/socket.io/socket.io.js'></script>
-
-<script type='module' src='/js/index.js'></script>

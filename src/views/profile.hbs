@@ -10,13 +10,24 @@
 <body>
     <div>
         {{> navbar}}
-        <form action='/api/sessions/logout' method='POST'>
-            <button type='submit'>Logout</button>
-        </form>
+        <div>
+            <form id="premium-form">
+                <label for="premium">Premium</label>
+                <input type="checkbox" id="premium" name="premium" {{#if premium}}checked{{/if}}>
+                <input type="submit" value="Accept T&C">
+            </form>
+        </div>
+        <div>
+            <form action='/api/sessions/logout' method='POST'>
+                <button type='submit'>Logout</button>
+            </form>
+        </div>
     </div>
 
     <h1>Welcome, {{first_name}}!</h1>
     <p>{{email}}</p>
+
+    <script src="/js/premiumToggler.js"></script>
 </body>
 
 </html>

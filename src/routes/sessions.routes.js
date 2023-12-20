@@ -1,11 +1,6 @@
 import { Router } from 'express';
 import passport from 'passport';
-import {
-    redirectIfAuthenticated,
-    verifyToken,
-    requireRole,
-    verifyAdmin,
-} from '../middlewares/auth.js';
+import { redirectIfAuthenticated, verifyToken, requireRole, verifyAdmin, refreshUser } from '../middlewares/auth.js';
 import jwt from 'jsonwebtoken';
 import sessionsMongo from '../dao/controllers/mongo/sessions.mongo.js';
 
@@ -21,35 +16,24 @@ router.get('/current', verifyToken, sessionsMongo.current);
 
 router.get('/users', verifyToken, verifyAdmin, sessionsMongo.getUsers);
 
+router.get('/me/cart', verifyToken, sessionsMongo.getUserCart);
+
 router.post('/signup', sessionsMongo.register);
 
 router.post('/login', sessionsMongo.login);
 
 router.post('/logout', sessionsMongo.logout);
 
-router.put(
-    '/users/:id',
-    verifyToken,
-    requireRole('admin'),
-    sessionsMongo.modifyRole
-);
+router.put('/users/:id', verifyToken, refreshUser, requireRole('admin'), sessionsMongo.modifyRole);
 
-router.delete(
-    '/users/:id',
-    verifyToken,
-    requireRole('admin'),
-    sessionsMongo.deleteUser
-);
+router.put('/profile', verifyToken, refreshUser, sessionsMongo.makeUserPremium);
+
+router.delete('/users/:id', verifyToken, requireRole('admin'), sessionsMongo.deleteUser);
 
 router.delete('/users', sessionsMongo.deleteUsers);
 
-// GitHub authentication route
-router.get(
-    '/github',
-    passport.authenticate('githubLoginStrategy', { session: false })
-);
+router.get('/github', passport.authenticate('githubLoginStrategy', { session: false }));
 
-// GitHub authentication callback route
 router.get(
     '/github-callback',
     passport.authenticate('githubLoginStrategy', {

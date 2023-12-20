@@ -31,11 +31,9 @@ describe('Carts Router', () => {
 
                         // Add the product to the cart
                         chai.request(app)
-                            .put(
-                                `/api/carts-test/${cartId}/products/${productId}`
-                            )
+                            .put(`/api/carts-test/${cartId}/products/${productId}`)
                             .send({ quantity: 1 })
-                            .end((err, res) => {
+                            .end(() => {
                                 done();
                             });
                     });

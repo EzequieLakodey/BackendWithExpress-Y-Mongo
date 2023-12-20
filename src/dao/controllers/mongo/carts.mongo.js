@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { cartsModel } from '../../models/carts.model.js';
 import { productsModel } from '../../models/products.model.js';
 import { logger } from '../../../middlewares/logger.js';
+import { usersModel } from '../../models/users.model.js';
 
 /* MODULES */
 
@@ -39,16 +40,8 @@ class CartsManagerMongo {
     }
 
     async updateCart(cartId, newCartData) {
-        logger.info(
-            `Updating cart ${cartId} with new data ${JSON.stringify(
-                newCartData
-            )}`
-        );
-        let updatedCart = await this.model.findByIdAndUpdate(
-            cartId,
-            newCartData,
-            { new: true }
-        );
+        logger.info(`Updating cart ${cartId} with new data ${JSON.stringify(newCartData)}`);
+        let updatedCart = await this.model.findByIdAndUpdate(cartId, newCartData, { new: true });
         return updatedCart;
     }
 
@@ -58,17 +51,13 @@ class CartsManagerMongo {
             if (!cart) {
                 throw new Error('Cart not found');
             }
-            const product = cart.products.find((p) =>
-                p.product.equals(productId)
-            );
+            const product = cart.products.find((p) => p.product.equals(productId));
 
             if (!product) {
                 throw new Error('Product not found in cart');
             }
             product.quantity = quantity;
-            logger.info(
-                `Updating product ${productId} quantity in cart ${cartId} to ${quantity}`
-            );
+            logger.info(`Updating product ${productId} quantity in cart ${cartId} to ${quantity}`);
             await cart.save();
             return cart;
         } catch (error) {
@@ -88,38 +77,49 @@ class CartsManagerMongo {
         return cart;
     }
 
-    async getCart(id) {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            throw new Error('Invalid Cart ID');
+    async getCart(userId, error) {
+        const user = await this.model.findById(userId).populate({
+            path: 'cart',
+            populate: {
+                path: 'products.product',
+            },
+        });
+        if (user) {
+            logger.info('user.cart', user.cart);
+            return user.cart;
+        } else {
+            logger.error('getCart carts.mongo User not found with id', userId, error);
         }
-        return this.model.findById(id).populate('products.product');
     }
 
-    async addProductToCart(cartId, productId, quantity) {
+    async addProductToCart(userId, productId, quantity) {
         this.validateProduct(productId);
-        let cart = await this.getCart(cartId);
+        let user = await usersModel.findById(userId).populate('cart');
+        if (!user) {
+            logger.error('User not found with id', userId);
+
+            throw new Error('User not found');
+        }
+        let cart = user.cart;
         if (!cart) {
             cart = await this.createCart();
+            user.cart = cart._id;
+            await user.save();
         }
         if (!mongoose.Types.ObjectId.isValid(productId)) {
             throw new Error('Invalid Product ID');
         }
-        const productIndex = cart.products.findIndex(
-            (p) => p.productId === productId
-        );
+        const productIndex = cart.products.findIndex((p) => p.product.equals(productId));
         if (productIndex !== -1) {
-            // If the product exists in the cart, update its quantity
-            cart.products[productIndex].quantity = quantity;
+            // If the product exists in the cart, increment its quantity
+            cart.products[productIndex].quantity += quantity;
         } else {
             // If the product does not exist in the cart, add it
-            this.validateProduct(cart, productId);
-            logger.info(
-                `Adding product ${productId} to cart ${cartId} with quantity ${quantity}`
-            );
+            this.validateProduct(productId);
+            logger.info(`Adding product ${productId} to cart ${cart._id} with quantity ${quantity}`);
 
             const product = {
                 product: productId,
-
                 quantity,
             };
             cart.products.push(product);
@@ -135,9 +135,7 @@ class CartsManagerMongo {
                 throw new Error('Cart not found');
             }
 
-            const productIndex = cart.products.findIndex((p) =>
-                p.product.equals(id)
-            );
+            const productIndex = cart.products.findIndex((p) => p.product.equals(id));
             if (productIndex === -1) {
                 throw new Error('Product not found in the cart');
             }
@@ -151,6 +149,7 @@ class CartsManagerMongo {
             throw error;
         }
     }
+
     async update() {}
 }
 
