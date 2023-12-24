@@ -10,7 +10,7 @@ export const config = {
         secretSession: process.env.SECRET_SESSION,
     },
     mongo: {
-        url: 'mongodb://localhost:27017',
+        url: process.env.MONGO_URL,
     },
     github: {
         clientId: process.env.CLIENT_ID,
