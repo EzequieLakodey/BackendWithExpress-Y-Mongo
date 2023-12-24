@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 export const config = {
     server: {
-        port: 8080,
+        port: process.env.PORT,
         secretSession: process.env.SECRET_SESSION,
     },
     mongo: {
@@ -15,6 +15,6 @@ export const config = {
     github: {
         clientId: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        callbackUrl: 'http://localhost:8080/api/sessions/github-callback',
+        callbackUrl: 'http://localhost:0000/api/sessions/github-callback',
     },
 };
