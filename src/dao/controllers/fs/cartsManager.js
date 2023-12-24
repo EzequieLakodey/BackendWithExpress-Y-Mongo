@@ -23,15 +23,12 @@ class CartsManager {
     async readFromFile() {
         try {
             const data = await fs.promises.readFile(this.path, 'utf-8');
-            return data ? JSON.parse(data) : [data];
             const json = JSON.parse(data);
             if (Array.isArray(json)) {
                 this.carts = json;
-                this.idCounter =
-                    this.carts.length > 0
-                        ? this.carts[this.carts.length - 1].id + 1
-                        : 1;
+                this.idCounter = this.carts.length > 0 ? this.carts[this.carts.length - 1].id + 1 : 1;
             }
+            return data ? JSON.parse(data) : [data];
         } catch (error) {
             console.error("Can't read disk data", error);
             throw new Error("Can't read disk data");

@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { logger } from './logger.js';
 import { usersMongo } from '../dao/controllers/mongo/users.mongo.js';
+import { cartsManager } from '../dao/controllers/mongo/carts.mongo.js';
+import { usersModel } from '../dao/models/users.model.js';
 
 export const authState = {
     checkedUser: null,
@@ -27,7 +29,9 @@ export function verifyToken(req, res, next) {
         // Fetch the user's information from the database
         const user = await usersMongo.getById(decoded._id);
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            // Clear the token and redirect to login page
+            res.clearCookie('token');
+            return res.redirect('/login');
         }
 
         // Set the user data in req.user

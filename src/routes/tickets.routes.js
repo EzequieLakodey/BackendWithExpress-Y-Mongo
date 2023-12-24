@@ -1,10 +1,13 @@
 import { Router } from 'express';
-import { ticketsMongo } from '../dao/controllers/mongo/tickets.mongo';
+import { ticketsMongo } from '../dao/controllers/mongo/tickets.mongo.js';
+import { verifyToken } from '../middlewares/auth.js';
+import { logger } from '../middlewares/logger.js';
 
 const router = Router();
 
-router.post('/', async (req, res) => {
-    const ticket = await ticketsMongo.createTicket(req.body);
+router.post('/', verifyToken, async (req, res) => {
+    logger.info('POST /api/tickets/purchase - confirming purchase');
+    const ticket = await ticketsMongo.createTicket(req);
     res.json(ticket);
 });
 

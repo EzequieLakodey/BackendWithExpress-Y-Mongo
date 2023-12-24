@@ -106,7 +106,7 @@ const login = async (req, res) => {
             // If not, create a new cart
             const newCart = await cartsManager.createCart();
             user.cart = newCart._id;
-            await user.save();
+            await usersMongo.update(user);
         }
         // Generate a JWT
         const token = jwt.sign(

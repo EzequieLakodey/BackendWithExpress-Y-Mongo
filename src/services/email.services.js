@@ -26,10 +26,7 @@ class EmailService {
         return new Promise((resolve, reject) => {
             transporter.sendMail(mailOptions, function (error, info) {
                 if (error) {
-                    logger.error(
-                        'An error occured while sending the mails:',
-                        error
-                    );
+                    logger.error('An error occured while sending the mails:', error);
                     reject(error);
                 } else {
                     logger.info('Email sent: ', +info.response);

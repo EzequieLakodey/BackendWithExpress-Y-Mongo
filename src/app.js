@@ -20,6 +20,7 @@ import { swaggerSpecs } from './config/swagger.js';
 import swaggerUI from 'swagger-ui-express';
 import { productsTestRouter } from './test/routes/products.test.routes.js';
 import { cartsTestRouter } from './test/routes/carts.test.routes.js';
+import { ticketsRouter } from './routes/tickets.routes.js';
 import fs from 'fs';
 
 /* MODULES */
@@ -76,6 +77,7 @@ app.use((err, req, res, next) => {
 
 app.use(express.static(__dirname + '/public'));
 app.use(viewsRouter);
+app.use('/api/tickets/purchase', ticketsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
 app.use('/api/chats', chatRouter);

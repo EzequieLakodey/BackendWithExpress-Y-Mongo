@@ -3,7 +3,7 @@ import { cartsModel } from '../../models/carts.model.js';
 import { productsModel } from '../../models/products.model.js';
 import { logger } from '../../../middlewares/logger.js';
 import { usersModel } from '../../models/users.model.js';
-
+import { usersMongo } from './users.mongo.js';
 /* MODULES */
 
 class CartsManagerMongo {
@@ -24,13 +24,13 @@ class CartsManagerMongo {
     }
 
     async getAllCarts() {
-        return this.model.find();
+        return this.model.find().populate('userId');
     }
 
-    async createCart() {
+    async createCart(userId) {
         try {
             logger.info('Creating new cart...');
-            const newCart = await this.model.create({});
+            const newCart = await this.model.create({ userId });
             logger.info(`New cart created with ID: ${newCart._id}`);
             return newCart;
         } catch (error) {
@@ -78,12 +78,7 @@ class CartsManagerMongo {
     }
 
     async getCart(userId, error) {
-        const user = await this.model.findById(userId).populate({
-            path: 'cart',
-            populate: {
-                path: 'products.product',
-            },
-        });
+        const user = await usersMongo.getById(userId);
         if (user) {
             logger.info('user.cart', user.cart);
             return user.cart;
@@ -97,15 +92,24 @@ class CartsManagerMongo {
         let user = await usersModel.findById(userId).populate('cart');
         if (!user) {
             logger.error('User not found with id', userId);
-
             throw new Error('User not found');
         }
         let cart = user.cart;
         if (!cart) {
-            cart = await this.createCart();
+            cart = await this.createCart(userId);
             user.cart = cart._id;
             await user.save();
+        } else {
+            // Check if the cart exists in the carts collection
+            const cartExists = await this.model.findById(user.cart._id);
+            if (!cartExists) {
+                // If the cart doesn't exist, create a new cart and assign it to the user
+                cart = await this.createCart(userId);
+                user.cart = cart._id;
+                await user.save();
+            }
         }
+
         if (!mongoose.Types.ObjectId.isValid(productId)) {
             throw new Error('Invalid Product ID');
         }

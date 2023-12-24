@@ -68,15 +68,15 @@ router.get('/:pid', verifyToken, async (req, res) => {
             if (!user) {
                 throw new Error('User not authenticated');
             }
-            console.log(`User's cart ID: ${user.cart}`);
-            const cart = await cartsModel.findById(user.cart);
-            console.log(`Fetched cart: ${cart}`);
-            if (!cart) {
-                throw new Error('Cart not found');
+
+            let cart = null;
+
+            if (user.cart) {
+                cart = await cartsModel.findById(user.cart);
             }
 
             // Pass the product and cart to the template
-            res.render('productsDetails', { product: product.toObject(), cart: cart.toObject(), user: req.user });
+            res.render('productsDetails', { product: product.toObject(), cart: cart ? cart.toObject() : null, user: req.user });
         } else {
             res.status(404).json({ error: 'Product not found' });
         }
@@ -132,6 +132,10 @@ router.delete('/:pid', verifyToken, requireRole('admin'), verifyPremium, async (
                 }
             }
         }
+        // Delete the product from the database
+        await productsManager.deleteProduct(pid);
+        // Send a response to the client
+        res.status(200).json({ message: 'Product deleted successfully' });
     } catch (error) {
         logger.error(`DELETE /api/products/:pid - ${error.message}`);
         res.status(500).json({ error: error.message });

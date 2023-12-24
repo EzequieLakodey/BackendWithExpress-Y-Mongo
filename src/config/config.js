@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
+import path from 'path';
+import { __dirname } from '../utils.js';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 export const config = {
     server: {

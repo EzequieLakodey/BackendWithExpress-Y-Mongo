@@ -20,27 +20,19 @@ const colors = {
 
 winston.addColors(colors);
 
-const developmentFormat = winston.format.combine(
-    winston.format.colorize({ all: true }),
-    winston.format.simple()
-);
+const developmentFormat = winston.format.combine(winston.format.colorize({ all: true }), winston.format.simple());
 
 const productionFormat = winston.format.json();
 
 const transports = [new winston.transports.Console()];
 
 if (process.env.NODE_ENV === 'production') {
-    transports.push(
-        new winston.transports.File({ filename: 'error.log', level: 'error' })
-    );
+    transports.push(new winston.transports.File({ filename: 'error.log', level: 'error' }));
     transports.push(new winston.transports.File({ filename: 'combined.log' }));
 }
 
 export const logger = winston.createLogger({
     levels,
-    format:
-        process.env.NODE_ENV === 'production'
-            ? productionFormat
-            : developmentFormat,
+    format: process.env.NODE_ENV === 'production' ? productionFormat : developmentFormat,
     transports,
 });

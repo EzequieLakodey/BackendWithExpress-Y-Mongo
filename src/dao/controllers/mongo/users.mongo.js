@@ -2,7 +2,6 @@ import { usersModel } from '../../models/users.model.js';
 import { UserDTO } from '../../../dto/users.dto.js';
 import { logger } from '../../../middlewares/logger.js';
 import { emailService } from '../../../services/email.services.js';
-import { cartsManager } from './carts.mongo.js';
 
 class UsersMongo {
     constructor() {

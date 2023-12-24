@@ -68,7 +68,8 @@ router.get('/:cid', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const newCart = await cartsManager.createCart();
+        const userId = req.body.userId; // or get userId from authenticated user's data
+        const newCart = await cartsManager.createCart(userId);
         io.emit('new-cart', newCart);
         res.json(newCart);
     } catch (error) {

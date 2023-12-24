@@ -13,6 +13,11 @@ const cartsSchema = new mongoose.Schema({
             quantity: Number,
         },
     ],
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        unique: true,
+    },
 });
 
 export const cartsModel = mongoose.model(cartsCollection, cartsSchema);
