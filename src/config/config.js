@@ -15,6 +15,6 @@ export const config = {
     github: {
         clientId: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        callbackUrl: 'http://localhost:8080/api/sessions/github-callback',
+        callbackUrl: `${process.env.APP_URL}/api/sessions/github-callback`,
     },
 };
