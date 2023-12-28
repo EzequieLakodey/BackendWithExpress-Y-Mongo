@@ -1,12 +1,13 @@
 import mongoose from 'mongoose';
 import { config } from './config.js';
+import { logger } from '../middlewares/logger.js';
 
 export const connectDB = async () => {
     try {
         await mongoose.connect(config.mongo.url);
-        console.log('listenning on port 0000');
+        console.log(`App running on PORT: ${process.env.PORT}`);
     } catch (error) {
-        `Error connecting to the DB: ${error.message}`;
+        logger.error(`Error connecting to the DB: ${error.message}`);
     }
 };
 
