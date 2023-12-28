@@ -62,4 +62,83 @@ Initialized empty Git repository in /home/blank/Documents/projects/fork backend/
 [?2004h]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ git add [K[K[K[Kbranch
 [?2004l[?1h=[K[?1l>[?2004h]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ git h[Kbranches
 [?2004lgit: 'branches' is not a git command. See 'git --help'.
-[?2004h]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ [K]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ [K]0;blank@blank: ~/Documents/projects/fork b
+[?2004h]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ [K]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ [K]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ ^C[?2004l[?2004h[?2004l
+[?2004h]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ clear
+[?2004l[H[2J[3J[?2004h]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ git branch
+[?2004l[?1h=[K[?1l>[?2004h]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ git init
+[?2004lReinitialized existing Git repository in /home/blank/Documents/projects/fork backend/src/scripts/.git/
+[?2004h]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ git branch
+[?2004l[?1h=[K[?1l>[?2004h]0;blank@blank: ~/Documents/projects/fork backend/src/scripts[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src/scripts[00m$ cd ..
+[?2004l[?2004h]0;blank@blank: ~/Documents/projects/fork backend/src[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend/src[00m$ cd ..
+[?2004l[?2004h]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ clear
+[?2004l[H[2J[3J[?2004h]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ git init
+[?2004lReinitialized existing Git repository in /home/blank/Documents/projects/fork backend/.git/
+[?2004h]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ git add .
+[?2004l[?2004h]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ git commit -m 'connected to cluster'
+[?2004l[master 924b743] connected to cluster
+ 6 files changed, 209 insertions(+), 42 deletions(-)
+ create mode 100644 typescript
+[?2004h]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ git push
+[?2004lEnumerating objects: 18, done.
+Counting objects:   5% (1/18)Counting objects:  11% (2/18)Counting objects:  16% (3/18)Counting objects:  22% (4/18)Counting objects:  27% (5/18)Counting objects:  33% (6/18)Counting objects:  38% (7/18)Counting objects:  44% (8/18)Counting objects:  50% (9/18)Counting objects:  55% (10/18)Counting objects:  61% (11/18)Counting objects:  66% (12/18)Counting objects:  72% (13/18)Counting objects:  77% (14/18)Counting objects:  83% (15/18)Counting objects:  88% (16/18)Counting objects:  94% (17/18)Counting objects: 100% (18/18)Counting objects: 100% (18/18), done.
+Delta compression using up to 12 threads
+Compressing objects:  10% (1/10)Compressing objects:  20% (2/10)Compressing objects:  30% (3/10)Compressing objects:  40% (4/10)Compressing objects:  50% (5/10)Compressing objects:  60% (6/10)Compressing objects:  70% (7/10)Compressing objects:  80% (8/10)Compressing objects:  90% (9/10)Compressing objects: 100% (10/10)Compressing objects: 100% (10/10), done.
+Writing objects:  10% (1/10)Writing objects:  20% (2/10)Writing objects:  30% (3/10)Writing objects:  40% (4/10)Writing objects:  50% (5/10)Writing objects:  60% (6/10)Writing objects:  70% (7/10)Writing objects:  80% (8/10)Writing objects:  90% (9/10)Writing objects: 100% (10/10)Writing objects: 100% (10/10), 3.65 KiB | 3.65 MiB/s, done.
+Total 10 (delta 6), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas:   0% (0/6)[Kremote: Resolving deltas:  16% (1/6)[Kremote: Resolving deltas:  33% (2/6)[Kremote: Resolving deltas:  50% (3/6)[Kremote: Resolving deltas:  66% (4/6)[Kremote: Resolving deltas:  83% (5/6)[Kremote: Resolving deltas: 100% (6/6)[Kremote: Resolving deltas: 100% (6/6), completed with 6 local objects.[K
+To github.com:EzequieLakodey/nodejs-mongo-first-project.git
+   f302d93..924b743  master -> master
+[?2004h]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ ^C[?2004l[?2004h[?2004l
+[?2004h]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ clear
+[?2004l[H[2J[3J[?2004h]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ [K]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ clear
+[?2004l[H[2J[3J[?2004h]0;blank@blank: ~/Documents/projects/fork backend[01;32mblank@blank[00m:[01;34m~/Documents/projects/fork backend[00m$ g[Knpm start
+[?2004l
+> fork-backend@1.0.0 start
+> node src/app.js
+
+App running on PORT: 8080
+App running on PORT: 8080
+App running on PORT: 8080
+[36minfo[39m: [36mGET /api/sessions/login - rendering login page[39m
+[36minfo[39m: [36mUser authenticated: EzequieLakodey@github.com[39m
+[36minfo[39m: [36mGET /api/products - fetching all products[39m
+[36minfo[39m: [36mUser authenticated: EzequieLakodey@github.com[39m
+[36minfo[39m: [36mGET /api/products/:pid - fetching product 658de25f93972dd0858e5b5f[39m
+[36minfo[39m: [36mCreating new cart...[39m
+[36minfo[39m: [36mNew cart created with ID: 658de3c66db276a4025fcf6a[39m
+[36minfo[39m: [36mCreating new cart...[39m
+[36minfo[39m: [36mAdding product 658de25f93972dd0858e5b5f to cart 658de3c66db276a4025fcf6a with quantity 1[39m
+[31merror[39m: [31mError creating new cart: E11000 duplicate key error collection: ecommerce.carts index: userId_1 dup key: { userId: ObjectId('658de1df33a0ca2ed02342d0') }[39m
+[31merror[39m: [31mPUT /api/carts/:cid/products/:pid - E11000 duplicate key error collection: ecommerce.carts index: userId_1 dup key: { userId: ObjectId('658de1df33a0ca2ed02342d0') }[39m
+[36minfo[39m: [36mPUT /api/carts/:cid/products/:pid - Product 658de25f93972dd0858e5b5f added to cart 658de1df33a0ca2ed02342d0[39m
+[36minfo[39m: [36mPUT /api/carts/:cid/products/:pid - Product 658de25f93972dd0858e5b5f added to cart 658de1df33a0ca2ed02342d0[39m
+[36minfo[39m: [36mUser authenticated: EzequieLakodey@github.com[39m
+[36minfo[39m: [36mGET /api/users/me/cart - fetching cart for user 658de1df33a0ca2ed02342d0[39m
+[36minfo[39m: [36mPUT /api/carts/:cid/products/:pid - Product 658de25f93972dd0858e5b5f added to cart 658de1df33a0ca2ed02342d0[39m
+[36minfo[39m: [36mUser authenticated: EzequieLakodey@github.com[39m
+[36minfo[39m: [36mPOST /api/tickets/purchase - confirming purchase[39m
+{
+  product: {
+    _id: new ObjectId([32m'658de25f93972dd0858e5b5f'[39m),
+    title: [32m'Unbranded Soft Chips'[39m,
+    description: [32m'Andy shoes are designed to keeping in mind durability as well as trends, the most stylish range of shoes & sandals'[39m,
+    code: [32m'Code-60'[39m,
+    category: [32m'Sports'[39m,
+    price: [33m10[39m,
+    stock: [33m342[39m,
+    __v: [33m0[39m
+  },
+  quantity: [33m3[39m,
+  _id: new ObjectId([32m'658de3c66db276a4025fcf75'[39m)
+}
+[36minfo[39m: [36mUser authenticated: EzequieLakodey@github.com[39m
+[36minfo[39m: [36mGET /api/users/me/cart - fetching cart for user 658de1df33a0ca2ed02342d0[39m
+[36minfo[39m: [36mUser authenticated: EzequieLakodey@github.com[39m
+[36minfo[39m: [36mGET /api/products - fetching all products[39m
+[36minfo[39m: [36mUser authenticated: EzequieLakodey@github.com[39m
+[36minfo[39m: [36mPOST /api/sessions/logout - user logged out[39m
+[36minfo[39m: [36mGET /api/sessions/login - rendering login page[39m
+[36minfo[39m: [36mGET /api/sessions/signup - rendering signup page[39m
+[36minfo[39m: [36mPOST /api/sessions/signup - user attempting to sign up[39m
+[36minfo[39m: [36mPOST /api/sessions/signup - user registered successfully[39m
+[36minfo[39m: 
